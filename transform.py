@@ -194,16 +194,16 @@ def load_synsets(root_eng, pos, eng_synsets, eng_glosses):
             eng_glosses[offset + pos] = gloss_split[1].strip()
     file.close()
     
-def write_english_glosses(root_result, eng_glosses):
+def write_english_glosses(eng_glosses, result_path):
     print "Writing english glosses..."
-    file = open(root_result + "/eng_glosses.txt", "wb")
+    file = open(result_path, "wb")
     for offset in sorted(eng_glosses):
         file.write(offset + " | " + eng_glosses[offset] + "\n")
     file.close()
     
-def load_spanish_glosses(root_result):
-    print "Writing english glosses..."
-    file = open(root_result + "/spa_glosses.txt", "r")
+def load_spanish_glosses(spanish_glosses_path):
+    print "Loading Spanish glosses..."
+    file = open(spanish_glosses_path, "r")
     glosses = {}
     for line in file.readlines():
         split = line.decode('utf-8').split(" | ")
@@ -213,18 +213,7 @@ def load_spanish_glosses(root_result):
     file.close()
     return glosses
 
-def transform(root_spa, root_eng, root_result):
-    """
-    Transforms the set of Spanish MCR 3.0 files into a text database compatible with the nltk WordNet corpus reader.
-
-    The process reads the files wei_spa-30_synset.tsv, wei_spa-30_variant.tsv and wei_spa-30_relation.tsv and generates a set of files following the WordNet database schema. The generated files will be: data.noun, index.noun, data.verb, index.verb, data.adj, index.adj, data.adv and index.adv.
-
-    If a synset doesn't have any lemma defined in the Spanish version, we use the first lemma of the English version (prepending a character `) for this synset. This means that when traversing the ontology, it's possible to find English placeholders for missing Spanish words.
-
-    :param root_spa: Path to the MCR 3.0 Spanish files
-    :param root_end: Path to the English WordNet 3.0 files
-    :param root_result: Path where the resulting files will be written
-    """
+def load_valid_synsets(root_spa):
     print "Loading valid synsets..."
     file = open(root_spa + "/wei_spa-30_synset.tsv")
     synsets = {}
@@ -232,17 +221,15 @@ def transform(root_spa, root_eng, root_result):
     synsets["a"] = []
     synsets["r"] = []
     synsets["v"] = []
-    glossless = 0
     for line in file.readlines():
         split = line.split("\t")
         [synset_number, synset_pos] = get_offset_pos(split[0])
         synset_gloss = split[6].decode("utf-8")
-        if synset_gloss.strip() == "" or synset_gloss == "NULL":
-            glossless += 1
         synsets[synset_pos].append([synset_number, synset_gloss])
-    print str(glossless) + " glosses missing"
     file.close()
+    return synsets
 
+def load_synset_variants(root_spa):
     print "Loading synset variants..."
     vars_file = open(root_spa + "/wei_spa-30_variant.tsv")
     variants = {}
@@ -254,7 +241,9 @@ def transform(root_spa, root_eng, root_result):
             variants[synset] = []
         variants[synset].append(variant)
     vars_file.close()
+    return variants
 
+def load_synset_relations(root_spa):
     print "Loading synset relations..."
     rels_file = open(root_spa + "/wei_spa-30_relation.tsv")
     relations = {}
@@ -272,7 +261,24 @@ def transform(root_spa, root_eng, root_result):
                     relations[to_synset] = []
                 relations[to_synset].append([SYMMETRIC_RELATION_MAP[type], from_synset])
     rels_file.close()
-    print len(relations)
+    return relations
+
+def transform(root_spa, root_eng, root_result, spanish_glosses_path = None):
+    """
+    Transforms the set of Spanish MCR 3.0 files into a text database compatible with the nltk WordNet corpus reader.
+
+    The process reads the files wei_spa-30_synset.tsv, wei_spa-30_variant.tsv and wei_spa-30_relation.tsv and generates a set of files following the WordNet database schema. The generated files will be: data.noun, index.noun, data.verb, index.verb, data.adj, index.adj, data.adv and index.adv.
+
+    If a synset doesn't have any lemma defined in the Spanish version, we use the first lemma of the English version (prepending a character `) for this synset. This means that when traversing the ontology, it's possible to find English placeholders for missing Spanish words.
+
+    :param root_spa: Path to the MCR 3.0 Spanish files
+    :param root_end: Path to the English WordNet 3.0 files
+    :param root_result: Path where the resulting files will be written
+    :param spanish_glosses_path: (optional) Path to the Spanish glosses file
+    """
+    synsets = load_valid_synsets(root_spa)
+    variants = load_synset_variants(root_spa)
+    relations = load_synset_relations(root_spa)
 
     print "Loading English synsets..."
     eng_synsets = {}
@@ -281,15 +287,13 @@ def transform(root_spa, root_eng, root_result):
     load_synsets(root_eng, "v", eng_synsets, eng_glosses)
     load_synsets(root_eng, "a", eng_synsets, eng_glosses)
     load_synsets(root_eng, "r", eng_synsets, eng_glosses)
-    
-    #print "Loading Spanish glosses..."
-    #spa_glosses = load_spanish_glosses(root_result)
-    spa_glosses = {}
+
+    if spanish_glosses_path != None:
+        spa_glosses = load_spanish_glosses(spanish_glosses_path)
+    else:
+        spa_glosses = {}
     
     print "Creating data files..."
-    
-    #write_english_glosses(root_result, eng_glosses)
-    
     synset_map = {}
     [noun_data, noun_variations] = create_data_file("n", synsets, variants, relations, eng_synsets, spa_glosses, synset_map)
     [verb_data, verb_variations] = create_data_file("v", synsets, variants, relations, eng_synsets, spa_glosses, synset_map)
@@ -307,3 +311,23 @@ def transform(root_spa, root_eng, root_result):
     write_index_file(root_result, "v", verb_variations, synset_map)
     write_index_file(root_result, "a", adj_variations, synset_map)
     write_index_file(root_result, "r", adv_variations, synset_map)
+
+def export_glosses(root_spa, root_eng, result_path):
+    """
+    Exports to a file the English glosses for all the synsets that do not have a corresponding gloss in Spanish MCR 3.0. This file can be translated and, if the format is honored, it can be fed back into the transformation process with glosses in Spanish.
+
+    :param root_spa: Path to the MCR 3.0 Spanish files
+    :param root_end: Path to the English WordNet 3.0 files
+    :param result_path: Path where the output will be written
+    """
+    synsets = load_valid_synsets(root_spa)
+
+    print "Loading English synsets..."
+    eng_synsets = {}
+    eng_glosses = {}
+    load_synsets(root_eng, "n", eng_synsets, eng_glosses)
+    load_synsets(root_eng, "v", eng_synsets, eng_glosses)
+    load_synsets(root_eng, "a", eng_synsets, eng_glosses)
+    load_synsets(root_eng, "r", eng_synsets, eng_glosses)
+    
+    write_english_glosses(eng_glosses, result_path)
