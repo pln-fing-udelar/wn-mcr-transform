@@ -45,6 +45,13 @@ SYMMETRIC_RELATION_MAP = {
     68: ";u"
 }
 
+FILE_HEADER_INFO = \
+    "  2 This file was created from the Multilingual Central Repository 3.0.\n" + \
+    "  3 The latest Spanish MCR 3.0 files can be downloaded from\n" + \
+    "  4 http://adimen.si.ehu.es/web/MCR/\n" + \
+    "  5 The latest version of the transformation process can be found in\n" + \
+    "  6 https://github.com/pln-fing-udelar/wn-mcr-transform\n"
+
 def get_offset_pos(synset):
     split = synset.split("-")
     offset = split[2]
@@ -55,7 +62,8 @@ def create_data_file(pos, synsets, variations, relations, eng_synsets, spa_gloss
     text_chunks = []
     variation_map = {}
 
-    text = "  1 MCR Spanish WordNet 3.0 " + POS_NAMES[pos] + " data file\n"
+    text =  "  1 MCR Spanish WordNet 3.0 " + POS_NAMES[pos] + " data file\n"
+    text += FILE_HEADER_INFO
     index = len(text)
     text_chunks.append(text)
 
@@ -174,6 +182,7 @@ def write_index_file(root_result, pos, variations_map, synset_map):
     print filename
     file = open(filename, "wb")
     file.write("  1 MCR Spanish WordNet 3.0 " + POS_NAMES[pos] + " index file\n")
+    file.write(FILE_HEADER_INFO)
     for lemma in lemmas:
         synset_count = str(len(variations_map[lemma]))
         file.write(lemma + " " + pos + " " + synset_count + " 0 " + synset_count + " 0")
@@ -312,7 +321,7 @@ def transform(root_spa, root_eng, root_result, spanish_glosses_path = None):
     write_index_file(root_result, "a", adj_variations, synset_map)
     write_index_file(root_result, "r", adv_variations, synset_map)
 
-def export_glosses(root_spa, root_eng, result_path):
+def export_glosses(root_eng, result_path):
     """
     Exports to a file the English glosses for all the synsets that do not have a corresponding gloss in Spanish MCR 3.0. This file can be translated and, if the format is honored, it can be fed back into the transformation process with glosses in Spanish.
 
@@ -320,8 +329,6 @@ def export_glosses(root_spa, root_eng, result_path):
     :param root_end: Path to the English WordNet 3.0 files
     :param result_path: Path where the output will be written
     """
-    synsets = load_valid_synsets(root_spa)
-
     print "Loading English synsets..."
     eng_synsets = {}
     eng_glosses = {}
