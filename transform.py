@@ -47,10 +47,35 @@ SYMMETRIC_RELATION_MAP = {
 
 FILE_HEADER_INFO = \
     "  2 This file was created from the Multilingual Central Repository 3.0.\n" + \
-    "  3 The latest Spanish MCR 3.0 files can be downloaded from\n" + \
+    "  3 The latest MCR 3.0 files can be downloaded from\n" + \
     "  4 http://adimen.si.ehu.es/web/MCR/\n" + \
     "  5 The latest version of the transformation process can be found in\n" + \
-    "  6 https://github.com/pln-fing-udelar/wn-mcr-transform\n"
+    "  6 https://github.com/pln-fing-udelar/wn-mcr-transform\n" + \
+    "  7 \n" + \
+    "  8 For more details on the MCR 3.0 contents, including references to the\n" + \
+    "  9 original resources, please consult the following paper:\n" + \
+    "  10   Gonzalez-Agirre A., Laparra E. and Rigau G. Multilingual Central\n" + \
+    "  11   Repository version 3.0: upgrading a very large lexical knowledge\n" + \
+    "  12   base. In Proceedings of the Sixth International Global WordNet\n" + \
+    "  13   Conference (GWC'12). Matsue, Japan. January, 2012.\n" + \
+    "  14 which can be downloaded at:\n" + \
+    "  15 http://adimen.si.ehu.es/~rigau/publications/gwc12-glr.pdf\n" + \
+    "  16 \n" + \
+    "  17 The contents of the MCR package are distributed under different open licenses.\n" + \
+    "  18 If you want to redistribute this software, part of it, or derived works based\n" + \
+    "  19 on it or on any of its parts, make sure you are doing so under the terms stated\n" + \
+    "  20 in the license applying to each of the involved modules.\n" + \
+    "  21 The licenses applying to the modules contained in MCR are the following:\n" + \
+    "  22  - English WordNet synset and relation data, contained in folder engWN/ are\n" + \
+    "  23      distributed under the original WordNet license. You can find it at\n" + \
+    "  24      http://wordnet.princeton.edu/wordnet/license\n" + \
+    "  25  - Basque WordNet synset and relation data, contained in folder eusWN/ are\n" + \
+    "  26      distributed under CreativeCommons Attribution-NonCommercial-ShareAlike 3.0\n" + \
+    "  27      Unported (CC BY-NC-SA 3.0) license. You can find it at\n" + \
+    "  28      http://creativecommons.org/licenses/by-nc-sa/3.0\n" + \
+    "  29  - All other data in MCR package are distributed under Attribution 3.0 Unported\n" + \
+    "  30      (CC BY 3.0) license. You can find it at\n" + \
+    "  31      http://creativecommons.org/licenses/by/3.0/\n"
 
 def get_offset_pos(synset):
     split = synset.split("-")
@@ -58,11 +83,11 @@ def get_offset_pos(synset):
     pos = split[3]
     return [offset, pos]
 
-def create_data_file(pos, synsets, variations, relations, eng_synsets, spa_glosses, synset_map):
+def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa_glosses, synset_map):
     text_chunks = []
     variation_map = {}
 
-    text =  "  1 MCR Spanish WordNet 3.0 " + POS_NAMES[pos] + " data file\n"
+    text =  "  1 MCR WordNet 3.0 (" + lang + ") " + POS_NAMES[pos] + " data file\n"
     text += FILE_HEADER_INFO
     index = len(text)
     text_chunks.append(text)
@@ -70,7 +95,7 @@ def create_data_file(pos, synsets, variations, relations, eng_synsets, spa_gloss
     synsets_set = dict([pos, set(synsets[pos][0])] for pos in synsets)
     
     for [synset, gloss] in synsets[pos]:
-        synset_name = "spa-30-" + synset + "-" + pos
+        synset_name = lang + "-30-" + synset + "-" + pos
         eng_offset = synset + pos
         
         text = synset
@@ -89,7 +114,7 @@ def create_data_file(pos, synsets, variations, relations, eng_synsets, spa_gloss
             text_chunks.append(text)
             
             for variation in variations[synset_name]:
-                text = variation.encode("latin-1")
+                text = cleanSpecialChars(variation).encode("latin-1")
                 index += len(text)
                 text_chunks.append(text)
                 
@@ -159,11 +184,18 @@ def create_data_file(pos, synsets, variations, relations, eng_synsets, spa_gloss
                 print eng_offset
                 print e
         else:
-            text = "| " + gloss.encode("latin-1") + "  \n"
+            cleanGloss = cleanSpecialChars(gloss)
+            text = "| " + cleanGloss.encode("latin-1") + "  \n"
             index += len(text)
             text_chunks.append(text)
 
     return [text_chunks, variation_map]
+
+def cleanSpecialChars(gloss):
+    # Catalan and Galician languages use some unicode characters in their 
+    # glosses that are not possible to encode in latin-1, though they are not
+    # part of the language so it's possible to replace them by other strings.
+    return gloss.replace(u'\u2019',"'").replace(u'\u201d','"').replace(u'\u200b', '').replace(u'\u03b1', 'alfa').replace(u'\u03b2', 'beta').replace(u'\u03b3', 'gamma').replace(u'\u03b4', 'delta').replace(u'\u2192', '->')
 
 def write_data_file(root_result, pos, text_chunks, synset_map):
     filename = root_result + "/data." + POS_NAMES[pos]
@@ -176,12 +208,12 @@ def write_data_file(root_result, pos, text_chunks, synset_map):
             file.write(text)
     file.close()
 
-def write_index_file(root_result, pos, variations_map, synset_map):
+def write_index_file(root_result, pos, lang, variations_map, synset_map):
     lemmas = sorted(variations_map.keys())
     filename = root_result + "/index." + POS_NAMES[pos]
     print filename
     file = open(filename, "wb")
-    file.write("  1 MCR Spanish WordNet 3.0 " + POS_NAMES[pos] + " index file\n")
+    file.write("  1 MCR WordNet 3.0 (" + lang + ") " + POS_NAMES[pos] + " index file\n")
     file.write(FILE_HEADER_INFO)
     for lemma in lemmas:
         synset_count = str(len(variations_map[lemma]))
@@ -210,9 +242,9 @@ def write_english_glosses(eng_glosses, result_path):
         file.write(offset + " | " + eng_glosses[offset] + "\n")
     file.close()
     
-def load_spanish_glosses(spanish_glosses_path):
-    print "Loading Spanish glosses..."
-    file = open(spanish_glosses_path, "r")
+def load_foreign_glosses(foreign_glosses_path):
+    print "Loading foreign glosses..."
+    file = open(foreign_glosses_path, "r")
     glosses = {}
     for line in file.readlines():
         split = line.decode('utf-8').split(" | ")
@@ -222,9 +254,9 @@ def load_spanish_glosses(spanish_glosses_path):
     file.close()
     return glosses
 
-def load_valid_synsets(root_spa):
+def load_valid_synsets(root_mcr, lang):
     print "Loading valid synsets..."
-    file = open(root_spa + "/wei_spa-30_synset.tsv")
+    file = open(root_mcr + "/" + lang + "WN/wei_" + lang + "-30_synset.tsv")
     synsets = {}
     synsets["n"] = []
     synsets["a"] = []
@@ -232,15 +264,16 @@ def load_valid_synsets(root_spa):
     synsets["v"] = []
     for line in file.readlines():
         split = line.split("\t")
-        [synset_number, synset_pos] = get_offset_pos(split[0])
-        synset_gloss = split[6].decode("utf-8")
-        synsets[synset_pos].append([synset_number, synset_gloss])
+        if split[0].strip() != "":
+            [synset_number, synset_pos] = get_offset_pos(split[0])
+            synset_gloss = split[6].decode("utf-8")
+            synsets[synset_pos].append([synset_number, synset_gloss])
     file.close()
     return synsets
 
-def load_synset_variants(root_spa):
+def load_synset_variants(root_mcr, lang):
     print "Loading synset variants..."
-    vars_file = open(root_spa + "/wei_spa-30_variant.tsv")
+    vars_file = open(root_mcr + "/" + lang + "WN/wei_" + lang + "-30_variant.tsv")
     variants = {}
     for line in vars_file.readlines():
         split = line.decode("utf-8").split("\t")
@@ -252,9 +285,9 @@ def load_synset_variants(root_spa):
     vars_file.close()
     return variants
 
-def load_synset_relations(root_spa):
+def load_synset_relations(root_mcr, lang):
     print "Loading synset relations..."
-    rels_file = open(root_spa + "/wei_spa-30_relation.tsv")
+    rels_file = open(root_mcr + "/" + lang + "WN/wei_" + lang + "-30_relation.tsv")
     relations = {}
     for line in rels_file.readlines():
         split = line.decode("utf-8").split("\t")
@@ -272,22 +305,24 @@ def load_synset_relations(root_spa):
     rels_file.close()
     return relations
 
-def transform(root_spa, root_eng, root_result, spanish_glosses_path = None):
+def transform(root_mcr, root_eng, lang, root_result, foreign_glosses_path = None):
     """
-    Transforms the set of Spanish MCR 3.0 files into a text database compatible with the nltk WordNet corpus reader.
+    Transforms the set of MCR 3.0 files into a text database compatible with the nltk WordNet corpus reader.
 
-    The process reads the files wei_spa-30_synset.tsv, wei_spa-30_variant.tsv and wei_spa-30_relation.tsv and generates a set of files following the WordNet database schema. The generated files will be: data.noun, index.noun, data.verb, index.verb, data.adj, index.adj, data.adv and index.adv.
+    The process reads the files wei_<lang>-30_synset.tsv, wei_<lang>-30_variant.tsv and wei_<lang>-30_relation.tsv and generates a set of files following the WordNet database schema. The generated files will be: data.noun, index.noun, data.verb, index.verb, data.adj, index.adj, data.adv and index.adv.
 
-    If a synset doesn't have any lemma defined in the Spanish version, we use the first lemma of the English version (prepending a character `) for this synset. This means that when traversing the ontology, it's possible to find English placeholders for missing Spanish words.
+    If a synset doesn't have any lemma defined in MCR, we use the first lemma of the English version (prepending a character `) for this synset. This means that when traversing the ontology, it's possible to find English placeholders for missing Spanish (or other language) words.
 
-    :param root_spa: Path to the MCR 3.0 Spanish files
+    :param root_mcr: Path to the root folder of MCR 3.0, this folder contains a folder for each language (e.g.: spaWN for Spanish)
     :param root_end: Path to the English WordNet 3.0 files
+    :param lang: first three letters of the language to transform (e.g.: spa for Spanish)
     :param root_result: Path where the resulting files will be written
-    :param spanish_glosses_path: (optional) Path to the Spanish glosses file
+    :param foreign_glosses_path: (optional) Path to the foreign glosses file
     """
-    synsets = load_valid_synsets(root_spa)
-    variants = load_synset_variants(root_spa)
-    relations = load_synset_relations(root_spa)
+    lang = lang.lower()
+    synsets = load_valid_synsets(root_mcr, lang)
+    variants = load_synset_variants(root_mcr, lang)
+    relations = load_synset_relations(root_mcr, lang)
 
     print "Loading English synsets..."
     eng_synsets = {}
@@ -297,17 +332,17 @@ def transform(root_spa, root_eng, root_result, spanish_glosses_path = None):
     load_synsets(root_eng, "a", eng_synsets, eng_glosses)
     load_synsets(root_eng, "r", eng_synsets, eng_glosses)
 
-    if spanish_glosses_path != None:
-        spa_glosses = load_spanish_glosses(spanish_glosses_path)
+    if foreign_glosses_path != None:
+        foreign_glosses = load_foreign_glosses(foreign_glosses_path)
     else:
-        spa_glosses = {}
+        foreign_glosses = {}
     
     print "Creating data files..."
     synset_map = {}
-    [noun_data, noun_variations] = create_data_file("n", synsets, variants, relations, eng_synsets, spa_glosses, synset_map)
-    [verb_data, verb_variations] = create_data_file("v", synsets, variants, relations, eng_synsets, spa_glosses, synset_map)
-    [adj_data, adj_variations] = create_data_file("a", synsets, variants, relations, eng_synsets, spa_glosses, synset_map)
-    [adv_data, adv_variations] = create_data_file("r", synsets, variants, relations, eng_synsets, spa_glosses, synset_map)
+    [noun_data, noun_variations] = create_data_file("n", lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
+    [verb_data, verb_variations] = create_data_file("v", lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
+    [adj_data, adj_variations] = create_data_file("a", lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
+    [adv_data, adv_variations] = create_data_file("r", lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
 
     # write data files
     write_data_file(root_result, "n", noun_data, synset_map)
@@ -316,16 +351,15 @@ def transform(root_spa, root_eng, root_result, spanish_glosses_path = None):
     write_data_file(root_result, "r", adv_data, synset_map)
 
     # write index files
-    write_index_file(root_result, "n", noun_variations, synset_map)
-    write_index_file(root_result, "v", verb_variations, synset_map)
-    write_index_file(root_result, "a", adj_variations, synset_map)
-    write_index_file(root_result, "r", adv_variations, synset_map)
+    write_index_file(root_result, "n", lang, noun_variations, synset_map)
+    write_index_file(root_result, "v", lang, verb_variations, synset_map)
+    write_index_file(root_result, "a", lang, adj_variations, synset_map)
+    write_index_file(root_result, "r", lang, adv_variations, synset_map)
 
 def export_glosses(root_eng, result_path):
     """
-    Exports to a file the English glosses for all the synsets that do not have a corresponding gloss in Spanish MCR 3.0. This file can be translated and, if the format is honored, it can be fed back into the transformation process with glosses in Spanish.
+    Exports to a file the English glosses for all the synsets that do not have a corresponding gloss in MCR 3.0. This file can be translated and, if the format is honored, it can be fed back into the transformation process with glosses in the foreign language.
 
-    :param root_spa: Path to the MCR 3.0 Spanish files
     :param root_end: Path to the English WordNet 3.0 files
     :param result_path: Path where the output will be written
     """
