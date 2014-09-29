@@ -83,6 +83,12 @@ def get_offset_pos(synset):
     pos = split[3]
     return [offset, pos]
 
+def get_synset(lang, offset, pos):
+    return lang + "-30-" + offset + "-" + pos
+
+def lexical_relations():
+    return ["!"]
+
 def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa_glosses, synset_map):
     text_chunks = []
     variation_map = {}
@@ -95,7 +101,7 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
     synsets_set = dict([pos, set(synsets[pos][0])] for pos in synsets)
     
     for [synset, gloss] in synsets[pos]:
-        synset_name = lang + "-30-" + synset + "-" + pos
+        synset_name = get_synset(lang, synset, pos)
         eng_offset = synset + pos
         
         text = synset
@@ -143,18 +149,33 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
         # relations
         if synset_name in relations:
             valid_relations = []
-            for [type,rs] in relations[synset_name]:
+            for [type, rs] in relations[synset_name]:
                 [rel_offset, rel_pos] = get_offset_pos(rs)
-                if rel_offset in synsets_set[rel_pos]:
-                    valid_relations.append([type, rel_offset, rel_pos])
-                elif rel_offset + rel_pos in eng_synsets:
-                    valid_relations.append([type, rel_offset, rel_pos])
-                
+                if rel_offset in synsets_set[rel_pos] or rel_offset + rel_pos in eng_synsets:
+                    if type in lexical_relations():
+                        synset_to = get_synset(lang, rel_offset, rel_pos)
+
+                        if synset_name in variations:
+                            len_lemmas_from = len(variations[synset_name])
+                        else:
+                            len_lemmas_from = 1
+
+                        if synset_to in variations:
+                            len_lemmas_to = len(variations[synset_to])
+                        else:
+                            len_lemmas_to = 1
+
+                        for i_lemma_from in range(1, len_lemmas_from+1):
+                            for i_lemma_to in range(1, len_lemmas_to+1):
+                                valid_relations.append([type, rel_offset, rel_pos, i_lemma_from, i_lemma_to])
+                    else:
+                        valid_relations.append([type, rel_offset, rel_pos, 0, 0])
+
             text = str(len(valid_relations)) + " "
             index += len(text)
             text_chunks.append(text)
             
-            for [type, rel_offset, rel_pos] in valid_relations:
+            for [type, rel_offset, rel_pos, lemma_from, lemma_to] in valid_relations:
                 text = type + " "
                 index += len(text)
                 text_chunks.append(text)
@@ -163,7 +184,7 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
                 index += len(text)
                 text_chunks.append("@" + text + rel_pos)
 
-                text = " " + rel_pos + " 0000 "
+                text = " " + rel_pos + " " + str(lemma_from).zfill(2) + str(lemma_to).zfill(2) + " "
                 index += len(text)
                 text_chunks.append(text)
         else:
