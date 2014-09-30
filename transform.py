@@ -80,7 +80,7 @@ def get_offset_pos(synset):
     split = synset.split("-")
     offset = split[2]
     pos = split[3]
-    return [offset, pos]
+    return offset, pos
 
 def get_synset(lang, offset, pos):
     return lang + "-30-" + offset + "-" + pos
@@ -99,7 +99,7 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
 
     synsets_set = dict([pos, set(synsets[pos][0])] for pos in synsets)
     
-    for [synset, gloss] in synsets[pos]:
+    for synset, gloss in synsets[pos]:
         synset_name = get_synset(lang, synset, pos)
         eng_offset = synset + pos
         
@@ -149,7 +149,7 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
         if synset_name in relations:
             valid_relations = []
             for type, rs in relations[synset_name]:
-                [rel_offset, rel_pos] = get_offset_pos(rs)
+                rel_offset, rel_pos = get_offset_pos(rs)
                 if rel_offset in synsets_set[rel_pos] or rel_offset + rel_pos in eng_synsets:
                     if type in lexical_relations():
                         synset_to = get_synset(lang, rel_offset, rel_pos)
@@ -166,15 +166,15 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
 
                         for i_lemma_from in range(1, len_lemmas_from+1):
                             for i_lemma_to in range(1, len_lemmas_to+1):
-                                valid_relations.append([type, rel_offset, rel_pos, i_lemma_from, i_lemma_to])
+                                valid_relations.append((type, rel_offset, rel_pos, i_lemma_from, i_lemma_to))
                     else:
-                        valid_relations.append([type, rel_offset, rel_pos, 0, 0])
+                        valid_relations.append((type, rel_offset, rel_pos, 0, 0))
 
             text = str(len(valid_relations)) + " "
             index += len(text)
             text_chunks.append(text)
             
-            for [type, rel_offset, rel_pos, lemma_from, lemma_to] in valid_relations:
+            for type, rel_offset, rel_pos, lemma_from, lemma_to in valid_relations:
                 text = type + " "
                 index += len(text)
                 text_chunks.append(text)
@@ -209,7 +209,7 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
             index += len(text)
             text_chunks.append(text)
 
-    return [text_chunks, variation_map]
+    return text_chunks, variation_map
 
 def cleanSpecialChars(gloss):
     # Catalan and Galician languages use some unicode characters in their 
@@ -285,9 +285,9 @@ def load_valid_synsets(root_mcr, lang):
     for line in file.readlines():
         split = line.split("\t")
         if split[0].strip() != "":
-            [synset_number, synset_pos] = get_offset_pos(split[0])
+            synset_number, synset_pos = get_offset_pos(split[0])
             synset_gloss = split[6].decode("utf-8")
-            synsets[synset_pos].append([synset_number, synset_gloss])
+            synsets[synset_pos].append((synset_number, synset_gloss))
     file.close()
     return synsets
 
@@ -359,10 +359,10 @@ def transform(root_mcr, root_eng, lang, root_result, foreign_glosses_path = None
     
     print "Creating data files..."
     synset_map = {}
-    [noun_data, noun_variations] = create_data_file("n", lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
-    [verb_data, verb_variations] = create_data_file("v", lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
-    [adj_data, adj_variations] = create_data_file("a", lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
-    [adv_data, adv_variations] = create_data_file("r", lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
+    noun_data, noun_variations = create_data_file("n", lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
+    verb_data, verb_variations = create_data_file("v", lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
+    adj_data, adj_variations = create_data_file("a", lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
+    adv_data, adv_variations = create_data_file("r", lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
 
     # write data files
     write_data_file(root_result, "n", noun_data, synset_map)
