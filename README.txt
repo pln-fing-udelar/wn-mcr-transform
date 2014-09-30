@@ -86,21 +86,23 @@ In particular, we must respect the constraint that the synset with numeric id XX
 The definition of realtions in MCR and WordNet differ. In MCR there are more relations defined, and it is not always easy to known which corresponds with which. However, the most usual relations (such as hyponym/hypernym and meronym/holonym) have been correctly mapped. The mapping of MCR relations that are transformed to WordNet relations follows (note that some of the mappings could be wrong and change in the future):
 
 MCR									WordNet
-Id	Name LR			Name RL			LR	Name LR							RL	Name RL
---------------------------------------------------------------------------------------------------------
-1	be_in_state		state_of		=	Attribute						=	Attribute
+Id	Name LR			Name RL			LR	Name LR						RL	Name RL
+----------------------------------------------------------------------------------------
+1	be_in_state		state_of		=	Attribute				=	Attribute
 2	causes			is_caused_by	>	cause
 4	has_derived		is_derived_from	\	derived from adjective
-6	has_holo_madeof	has_mero_madeof	#s	substance holonym				%s	substance meronym
-7	has_holo_member	has_mero_member	#m	member holonym					%m	member meronym
-8	has_holo_part	has_mero_part	#p	part holonym					%p	part meronym
-12	has_hyponym		has_hyperonym	~	hyponym							@	hypernym
+6	has_holo_madeof	has_mero_madeof	#s	substance holonym		%s	substance meronym
+7	has_holo_member	has_mero_member	#m	member holonym			%m	member meronym
+8	has_holo_part	has_mero_part	#p	part holonym			%p	part meronym
+12	has_hyponym		has_hyperonym	~	hyponym					@	hypernym
 19	has_subevent	is_subevent_of	*	entailment
-33	near_antonym	-				!	antonym							!	antonym
-34	near_synonym	-				&	similar							&	similar
+33	near_antonym	-				!	antonym					!	antonym
+34	near_synonym	-				&	similar					&	similar
 49	see_also_wn15	-				^	also see
-52	verb_group		-				$	verb group						$	verb group
-63	category_term	category		-c	member of this domain - topic	;c	domain of synset - region
-64	related_to		-				+	derivationally related form		+	derivationally related form
-66	region_term		region			-r	member of this domain - region	;r	domain of synset - region
-68	usage_term		usage			-u	member of this domain - usage	;u	domain of synset - usage
+52	verb_group		-				$	verb group				$	verb group
+63	category_term	category		-c	member - topic			;c	domain - region
+64	related_to		-				+	deriv. related form		+	deriv. related form
+66	region_term		region			-r	member - region			;r	domain - region
+68	usage_term		usage			-u	member - usage			;u	domain - usage
+
+There is a difference between the way hypernyms are defined in MCR and WordNet. In the original WordNet the antonymy relation holds between two lemmas (the nltk corpus reader browses the antonyms this way), while in MCR the relation is between synsets. Because of this, we consider that an antonym relation between synsets S1 and S2 in MCR will correspond, in the transformed version, to a set of antonym relations between lemmas L1 and L2, for all L1 in S1 and all L2 in S2.
