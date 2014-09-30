@@ -4,6 +4,8 @@
 # 
 # Author: Luis Chiruzzo <luischir@fing.edu.uy>
 
+from sets import Set
+
 POS_NAMES = {
     "n": "noun",
     "a": "adj",
@@ -31,12 +33,10 @@ RELATION_MAP = {
 }
 
 SYMMETRIC_RELATION_MAP = {
-    1: "=",
     6: "%s",
     7: "%m",
     8: "%p",
     12: "@",
-    34: "&",
     52: "$",
     63: ";c",
     64: "+",
@@ -148,7 +148,7 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
         # relations
         if synset_name in relations:
             valid_relations = []
-            for [type, rs] in relations[synset_name]:
+            for type, rs in relations[synset_name]:
                 [rel_offset, rel_pos] = get_offset_pos(rs)
                 if rel_offset in synsets_set[rel_pos] or rel_offset + rel_pos in eng_synsets:
                     if type in lexical_relations():
@@ -316,12 +316,12 @@ def load_synset_relations(root_mcr, lang):
         to_synset = split[3]
         if type in RELATION_MAP:
             if from_synset not in relations:
-                relations[from_synset] = []
-            relations[from_synset].append([RELATION_MAP[type], to_synset])
+                relations[from_synset] = set()
+            relations[from_synset].add((RELATION_MAP[type], to_synset))
             if type in SYMMETRIC_RELATION_MAP:
                 if to_synset not in relations:
-                    relations[to_synset] = []
-                relations[to_synset].append([SYMMETRIC_RELATION_MAP[type], from_synset])
+                    relations[to_synset] = set()
+                relations[to_synset].add((SYMMETRIC_RELATION_MAP[type], from_synset))
     rels_file.close()
     return relations
 
