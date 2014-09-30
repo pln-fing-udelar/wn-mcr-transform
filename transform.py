@@ -392,6 +392,5 @@ if __name__ == "__main__":
             foreign_glosses_path = sys.argv[5]
         transform(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], foreign_glosses_path)
     else:
-        print "Invalid number of arguments."
-        print "Syntax should be:"
+        print "Invalid number of arguments. Syntax should be:"
         print "    $ python transform.py root_mcr root_eng lang root_result [foreign_glosses_path]"
