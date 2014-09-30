@@ -383,10 +383,8 @@ def export_glosses(root_eng, result_path):
     print "Loading English synsets..."
     eng_synsets = {}
     eng_glosses = {}
-    load_synsets(root_eng, "n", eng_synsets, eng_glosses)
-    load_synsets(root_eng, "v", eng_synsets, eng_glosses)
-    load_synsets(root_eng, "a", eng_synsets, eng_glosses)
-    load_synsets(root_eng, "r", eng_synsets, eng_glosses)
+    for pos in POS_NAMES:
+        load_synsets(root_eng, pos, eng_synsets, eng_glosses)
     
     write_english_glosses(eng_glosses, result_path)
 
