@@ -359,22 +359,16 @@ def transform(root_mcr, root_eng, lang, root_result, foreign_glosses_path = None
     
     print "Creating data files..."
     synset_map = {}
-    noun_data, noun_variations = create_data_file("n", lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
-    verb_data, verb_variations = create_data_file("v", lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
-    adj_data, adj_variations = create_data_file("a", lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
-    adv_data, adv_variations = create_data_file("r", lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
 
-    # write data files
-    write_data_file(root_result, "n", noun_data, synset_map)
-    write_data_file(root_result, "v", verb_data, synset_map)
-    write_data_file(root_result, "a", adj_data, synset_map)
-    write_data_file(root_result, "r", adv_data, synset_map)
+    data = {}
+    variations = {}
 
-    # write index files
-    write_index_file(root_result, "n", lang, noun_variations, synset_map)
-    write_index_file(root_result, "v", lang, verb_variations, synset_map)
-    write_index_file(root_result, "a", lang, adj_variations, synset_map)
-    write_index_file(root_result, "r", lang, adv_variations, synset_map)
+    for pos in POS_NAMES:
+        data[pos], variations[pos] = create_data_file(pos, lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
+
+    for pos in POS_NAMES:
+        write_data_file(root_result, pos, data[pos], synset_map)
+        write_index_file(root_result, pos, lang, variations[pos], synset_map)
 
 def export_glosses(root_eng, result_path):
     """
