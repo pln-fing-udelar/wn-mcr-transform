@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # This module transforms MCR 3.0 database files into WordNet 3.0 database files.
 # The resulting files can be loaded with the nltk WordNet reader using:
 #   nltk.corpus.reader.wordnet.WordNetCorpusReader(<FILES_ROOT>)
@@ -5,6 +6,8 @@
 # Author: Luis Chiruzzo <luischir@fing.edu.uy>
 
 from sets import Set
+
+import sys
 
 POS_NAMES = {
     "n": "noun",
@@ -386,3 +389,15 @@ def export_glosses(root_eng, result_path):
     load_synsets(root_eng, "r", eng_synsets, eng_glosses)
     
     write_english_glosses(eng_glosses, result_path)
+
+if __name__ == "__main__":
+    if 5 <= len(sys.argv) <= 6:
+        if len(sys.argv) == 5:
+            foreign_glosses_path = None
+        else:
+            foreign_glosses_path = sys.argv[5]
+        transform(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], foreign_glosses_path)
+    else:
+        print "Invalid number of arguments."
+        print "Syntax should be:"
+        print "    $ python transform.py root_mcr root_eng lang root_result [foreign_glosses_path]"
