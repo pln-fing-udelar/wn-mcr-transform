@@ -281,10 +281,8 @@ def load_valid_synsets(root_mcr, lang):
     print "Loading valid synsets..."
     file = open(root_mcr + "/" + lang + "WN/wei_" + lang + "-30_synset.tsv")
     synsets = {}
-    synsets["n"] = []
-    synsets["a"] = []
-    synsets["r"] = []
-    synsets["v"] = []
+    for pos in POS_NAMES:
+        synsets[pos] = []
     for line in file.readlines():
         split = line.split("\t")
         if split[0].strip() != "":
@@ -350,10 +348,8 @@ def transform(root_mcr, root_eng, lang, root_result, foreign_glosses_path = None
     print "Loading English synsets..."
     eng_synsets = {}
     eng_glosses = {}
-    load_synsets(root_eng, "n", eng_synsets, eng_glosses)
-    load_synsets(root_eng, "v", eng_synsets, eng_glosses)
-    load_synsets(root_eng, "a", eng_synsets, eng_glosses)
-    load_synsets(root_eng, "r", eng_synsets, eng_glosses)
+    for pos in POS_NAMES:
+        load_synsets(root_eng, pos, eng_synsets, eng_glosses)
 
     if foreign_glosses_path != None:
         foreign_glosses = load_foreign_glosses(foreign_glosses_path)
