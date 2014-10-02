@@ -80,6 +80,9 @@ FILE_HEADER_INFO = \
     "  30      (CC BY 3.0) license. You can find it at\n" + \
     "  31      http://creativecommons.org/licenses/by/3.0/\n"
 
+def get_file_header_info(lang, pos):
+    return "  1 MCR WordNet 3.0 (" + lang + ") " + POS_NAMES[pos] + " data file\n" + FILE_HEADER_INFO
+
 def get_offset_pos(synset):
     split = synset.split("-")
     offset = split[2]
@@ -96,8 +99,7 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
     text_chunks = []
     variation_map = {}
 
-    text =  "  1 MCR WordNet 3.0 (" + lang + ") " + POS_NAMES[pos] + " data file\n"
-    text += FILE_HEADER_INFO
+    text = get_file_header_info(lang, pos)
     index = len(text)
     text_chunks.append(text)
 
@@ -239,8 +241,7 @@ def write_index_file(root_result, pos, lang, variations_map, synset_map):
     filename = root_result + "/index." + POS_NAMES[pos]
     print filename
     file = open(filename, "wb")
-    file.write("  1 MCR WordNet 3.0 (" + lang + ") " + POS_NAMES[pos] + " index file\n")
-    file.write(FILE_HEADER_INFO)
+    file.write(get_file_header_info(lang, pos))
     for lemma in lemmas:
         synset_count = str(len(variations_map[lemma]))
         file.write(lemma + " " + pos + " " + synset_count + " 0 " + synset_count + " 0")
