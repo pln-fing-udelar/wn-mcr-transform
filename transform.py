@@ -7,6 +7,7 @@
 
 from sets import Set
 
+import re
 import sys
 
 POS_NAMES = {
@@ -126,10 +127,11 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
                 index += len(text)
                 text_chunks.append(text)
                 
-                lower = text.lower()
-                if not lower in variation_map:
-                    variation_map[lower] = []
-                variation_map[lower].append(synset)
+                m = re.match(r'(.*?)(\(.*\))?$', text.lower())
+                lemma_name, syn_mark = m.groups()
+                if not lemma_name in variation_map:
+                    variation_map[lemma_name] = []
+                variation_map[lemma_name].append(synset)
                 
                 text = " 0 "
                 index += len(text)
@@ -138,10 +140,11 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
             # use the english lemma
             if eng_offset in eng_synsets:
                 lemma = "`" + eng_synsets[eng_offset]
-                lower = lemma.lower()
-                if not lower in variation_map:
-                    variation_map[lower] = []
-                variation_map[lower].append(synset)
+                m = re.match(r'(.*?)(\(.*\))?$', lemma.lower())
+                lemma_name, syn_mark = m.groups()
+                if not lemma_name in variation_map:
+                    variation_map[lemma_name] = []
+                variation_map[lemma_name].append(synset)
             else:
                 lemma = "<unknown>"
             text = "01 " + lemma + " 0 "
