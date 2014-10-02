@@ -117,7 +117,7 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
         
         # variations
         if synset_name in variations:
-            text = str(len(variations[synset_name])) + " "
+            text = format(len(variations[synset_name]), '02x') + " "
             index += len(text)
             text_chunks.append(text)
             
@@ -144,7 +144,7 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
                 variation_map[lower].append(synset)
             else:
                 lemma = "<unknown>"
-            text = "1 " + lemma + " 0 "
+            text = "01 " + lemma + " 0 "
             index += len(text)
             text_chunks.append(text)
 
@@ -173,7 +173,7 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
                     else:
                         valid_relations.append((type, rel_offset, rel_pos, 0, 0))
 
-            text = str(len(valid_relations)) + " "
+            text = str(len(valid_relations)).zfill(2) + " "
             index += len(text)
             text_chunks.append(text)
             
@@ -186,7 +186,7 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
                 index += len(text)
                 text_chunks.append("@" + text + rel_pos)
 
-                text = " " + rel_pos + " " + str(lemma_from).zfill(2) + str(lemma_to).zfill(2) + " "
+                text = " " + rel_pos + " " + format(lemma_from, '02x') + format(lemma_to, '02x') + " "
                 index += len(text)
                 text_chunks.append(text)
         else:
@@ -386,7 +386,7 @@ def export_glosses(root_eng, result_path):
 
 if __name__ == "__main__":
     if 5 <= len(sys.argv) <= 6:
-        if len(sys.argv) == 5:
+        if len(sys.argv) == 5 or sys.argv[5] == "":
             foreign_glosses_path = None
         else:
             foreign_glosses_path = sys.argv[5]
