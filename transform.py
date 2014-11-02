@@ -7,6 +7,7 @@
 
 from sets import Set
 
+import io
 import re
 import sys
 
@@ -81,7 +82,7 @@ FILE_HEADER_INFO = \
     "  31      http://creativecommons.org/licenses/by/3.0/\n"
 
 def get_file_header_info(lang, pos):
-    return "  1 MCR WordNet 3.0 (" + lang + ") " + POS_NAMES[pos] + " data file\n" + FILE_HEADER_INFO
+    return u"  1 MCR WordNet 3.0 (" + lang + u") " + POS_NAMES[pos] + u" data file\n" + FILE_HEADER_INFO
 
 def get_offset_pos(synset):
     split = synset.split("-")
@@ -90,7 +91,7 @@ def get_offset_pos(synset):
     return offset, pos
 
 def get_synset(lang, offset, pos):
-    return lang + "-30-" + offset + "-" + pos
+    return lang + u"-30-" + offset + u"-" + pos
 
 def lexical_relations():
     return ["!"]
@@ -110,22 +111,22 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
         eng_offset = synset + pos
         
         text = synset
-        synset_map["@" + text + pos] = index
+        synset_map[u"@" + text + pos] = index
         index += len(text)
-        text_chunks.append("@" + text + pos)
+        text_chunks.append(u"@" + text + pos)
         
-        text = " 00 " + pos + " "
+        text = u" 00 " + pos + u" "
         index += len(text)
         text_chunks.append(text)
         
         # variations
         if synset_name in variations:
-            text = format(len(variations[synset_name]), '02x') + " "
+            text = format(len(variations[synset_name]), '02x') + u" "
             index += len(text)
             text_chunks.append(text)
             
             for variation in variations[synset_name]:
-                text = cleanSpecialChars(variation).encode("latin-1")
+                text = variation
                 index += len(text)
                 text_chunks.append(text)
                 
@@ -135,21 +136,21 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
                     variation_map[lemma_name] = []
                 variation_map[lemma_name].append(synset)
                 
-                text = " 0 "
+                text = u" 0 "
                 index += len(text)
                 text_chunks.append(text)
         else:
             # use the english lemma
             if eng_offset in eng_synsets:
-                lemma = "`" + eng_synsets[eng_offset]
+                lemma = u"`" + eng_synsets[eng_offset]
                 m = re.match(r'(.*?)(\(.*\))?$', lemma.lower())
                 lemma_name, syn_mark = m.groups()
                 if not lemma_name in variation_map:
                     variation_map[lemma_name] = []
                 variation_map[lemma_name].append(synset)
             else:
-                lemma = "<unknown>"
-            text = "01 " + lemma + " 0 "
+                lemma = u"<unknown>"
+            text = u"01 " + lemma + u" 0 "
             index += len(text)
             text_chunks.append(text)
 
@@ -178,60 +179,53 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
                     else:
                         valid_relations.append((type, rel_offset, rel_pos, 0, 0))
 
-            text = str(len(valid_relations)).zfill(2) + " "
+            text = str(len(valid_relations)).zfill(2) + u" "
             index += len(text)
             text_chunks.append(text)
             
             for type, rel_offset, rel_pos, lemma_from, lemma_to in valid_relations:
-                text = type + " "
+                text = type + u" "
                 index += len(text)
                 text_chunks.append(text)
                 
                 text = rel_offset
                 index += len(text)
-                text_chunks.append("@" + text + rel_pos)
+                text_chunks.append(u"@" + text + rel_pos)
 
-                text = " " + rel_pos + " " + format(lemma_from, '02x') + format(lemma_to, '02x') + " "
+                text = u" " + rel_pos + u" " + format(lemma_from, '02x') + format(lemma_to, '02x') + u" "
                 index += len(text)
                 text_chunks.append(text)
         else:
-            text = "0 "
+            text = u"0 "
             index += len(text)
             text_chunks.append(text)
 
         # gloss
-        if (gloss == "NULL" or gloss.strip() == "") and eng_offset in spa_glosses:
+        if (gloss == u"NULL" or gloss.strip() == "") and eng_offset in spa_glosses:
             try:
-                text = "| " + spa_glosses[eng_offset].encode("latin-1") + "  \n"
+                text = u"| " + spa_glosses[eng_offset] + u"  \n"
                 index += len(text)
                 text_chunks.append(text)
             except UnicodeEncodeError as e:
-                text = "| " + gloss.encode("latin-1") + "  \n"
+                text = u"| " + gloss + u"  \n"
                 index += len(text)
                 text_chunks.append(text)
                 print eng_offset
                 print e
         else:
-            cleanGloss = cleanSpecialChars(gloss)
-            text = "| " + cleanGloss.encode("latin-1") + "  \n"
+            text = u"| " + gloss + u"  \n"
             index += len(text)
             text_chunks.append(text)
 
     return text_chunks, variation_map
 
-def cleanSpecialChars(gloss):
-    # Catalan and Galician languages use some unicode characters in their 
-    # glosses that are not possible to encode in latin-1, though they are not
-    # part of the language so it's possible to replace them by other strings.
-    return gloss.replace(u'\u2019',"'").replace(u'\u201d','"').replace(u'\u200b', '').replace(u'\u03b1', 'alfa').replace(u'\u03b2', 'beta').replace(u'\u03b3', 'gamma').replace(u'\u03b4', 'delta').replace(u'\u2192', '->')
-
 def write_data_file(root_result, pos, text_chunks, synset_map):
     filename = root_result + "/data." + POS_NAMES[pos]
     print filename
-    file = open(filename, "wb")
+    file = io.open(filename, mode="w", encoding="utf-8")
     for text in text_chunks:
         if text in synset_map:
-            file.write("{0:08d}".format(synset_map[text]))
+            file.write(u"{0:08d}".format(synset_map[text]))
         else:
             file.write(text)
     file.close()
@@ -240,19 +234,19 @@ def write_index_file(root_result, pos, lang, variations_map, synset_map):
     lemmas = sorted(variations_map.keys())
     filename = root_result + "/index." + POS_NAMES[pos]
     print filename
-    file = open(filename, "wb")
+    file = io.open(filename, mode="w", encoding="utf-8")
     file.write(get_file_header_info(lang, pos))
     for lemma in lemmas:
         synset_count = str(len(variations_map[lemma]))
-        file.write(lemma + " " + pos + " " + synset_count + " 0 " + synset_count + " 0")
+        file.write(lemma + u" " + pos + u" " + synset_count + u" 0 " + synset_count + u" 0")
         for offset in variations_map[lemma]:
-            file.write(" {0:08d}".format(synset_map["@" + offset + pos]))
-        file.write("  \n")
+            file.write(u" {0:08d}".format(synset_map[u"@" + offset + pos]))
+        file.write(u"  \n")
     file.close()
 
 def load_synsets(root_eng, pos, eng_synsets, eng_glosses):
-    file = open(root_eng + "/data." + POS_NAMES[pos], "r")
-    for line in file.readlines():
+    file = io.open(root_eng + "/data." + POS_NAMES[pos], encoding="utf-8")
+    for line in file:
         if not line.startswith("  "):
             split = line.split(" ")
             offset = split[0]
@@ -264,17 +258,17 @@ def load_synsets(root_eng, pos, eng_synsets, eng_glosses):
     
 def write_english_glosses(eng_glosses, result_path):
     print "Writing english glosses..."
-    file = open(result_path, "wb")
+    file = io.open(result_path, mode="w", encoding="utf-8")
     for offset in sorted(eng_glosses):
-        file.write(offset + " | " + eng_glosses[offset] + "\n")
+        file.write(offset + u" | " + eng_glosses[offset] + u"\n")
     file.close()
     
 def load_foreign_glosses(foreign_glosses_path):
     print "Loading foreign glosses..."
-    file = open(foreign_glosses_path, "r")
+    file = io.open(foreign_glosses_path, encoding="utf-8")
     glosses = {}
-    for line in file.readlines():
-        split = line.decode('utf-8').split(" | ")
+    for line in file:
+        split = line.split(" | ")
         offset = split[0].strip()
         gloss = split[1].strip()
         glosses[offset] = gloss
@@ -283,25 +277,25 @@ def load_foreign_glosses(foreign_glosses_path):
 
 def load_valid_synsets(root_mcr, lang):
     print "Loading valid synsets..."
-    file = open(root_mcr + "/" + lang + "WN/wei_" + lang + "-30_synset.tsv")
+    file = io.open(root_mcr + "/" + lang + "WN/wei_" + lang + "-30_synset.tsv", encoding="utf-8")
     synsets = {}
     for pos in POS_NAMES:
         synsets[pos] = []
-    for line in file.readlines():
+    for line in file:
         split = line.split("\t")
         if split[0].strip() != "":
             synset_number, synset_pos = get_offset_pos(split[0])
-            synset_gloss = split[6].decode("utf-8")
+            synset_gloss = split[6]
             synsets[synset_pos].append((synset_number, synset_gloss))
     file.close()
     return synsets
 
 def load_synset_variants(root_mcr, lang):
     print "Loading synset variants..."
-    vars_file = open(root_mcr + "/" + lang + "WN/wei_" + lang + "-30_variant.tsv")
+    vars_file = io.open(root_mcr + "/" + lang + "WN/wei_" + lang + "-30_variant.tsv", encoding="utf-8")
     variants = {}
     for line in vars_file.readlines():
-        split = line.decode("utf-8").split("\t")
+        split = line.split("\t")
         variant = split[0]
         synset = split[2]
         if synset not in variants:
@@ -312,10 +306,10 @@ def load_synset_variants(root_mcr, lang):
 
 def load_synset_relations(root_mcr, lang):
     print "Loading synset relations..."
-    rels_file = open(root_mcr + "/" + lang + "WN/wei_" + lang + "-30_relation.tsv")
+    rels_file = io.open(root_mcr + "/" + lang + "WN/wei_" + lang + "-30_relation.tsv", encoding="utf-8")
     relations = {}
-    for line in rels_file.readlines():
-        split = line.decode("utf-8").split("\t")
+    for line in rels_file:
+        split = line.split("\t")
         type = int(split[0])
         from_synset = split[1]
         to_synset = split[3]
