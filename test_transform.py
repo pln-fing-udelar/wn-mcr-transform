@@ -10,9 +10,9 @@ import unittest
 
 class TestTransform(unittest.TestCase):
     @classmethod
-    def setUpClass(self):
-        self.languages = ["cat", "eng", "eus", "glg", "spa"]
-        for lang in self.languages:
+    def setUpClass(cls):
+        cls.languages = ["cat", "eng", "eus", "glg", "spa"]
+        for lang in cls.languages:
             wn_name = 'wordnet_' + lang
             with contextlib.closing(lzma.LZMAFile(wn_name + '.tar.lzma')) as xz:
                 with tarfile.open(fileobj=xz) as f:
@@ -22,7 +22,7 @@ class TestTransform(unittest.TestCase):
         for lang in self.languages:
             wn_name = 'wordnet_' + lang
             self.wncr = WordNetCorpusReader(wn_name, None)
-        # success if there is no error
+            # success if there is no error
 
     def test_invalid_literal_for_int_16(self):
         self.wncr = WordNetCorpusReader('wordnet_spa', None)
@@ -41,8 +41,8 @@ class TestTransform(unittest.TestCase):
         # success if there is no error
 
     @classmethod
-    def tearDownClass(self):
-        for lang in self.languages:
+    def tearDownClass(cls):
+        for lang in cls.languages:
             wn_name = 'wordnet_' + lang
             shutil.rmtree(wn_name)
 
