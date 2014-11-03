@@ -96,12 +96,15 @@ def get_synset(lang, offset, pos):
 def lexical_relations():
     return ["!"]
 
+def utf8len(s):
+    return len(s.encode('utf-8'))
+
 def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa_glosses, synset_map):
     text_chunks = []
     variation_map = {}
 
     text = get_file_header_info(lang, pos)
-    index = len(text)
+    index = utf8len(text)
     text_chunks.append(text)
 
     synsets_set = dict([pos, set(synsets[pos][0])] for pos in synsets)
@@ -112,22 +115,22 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
         
         text = synset
         synset_map[u"@" + text + pos] = index
-        index += len(text)
+        index += utf8len(text)
         text_chunks.append(u"@" + text + pos)
         
         text = u" 00 " + pos + u" "
-        index += len(text)
+        index += utf8len(text)
         text_chunks.append(text)
         
         # variations
         if synset_name in variations:
             text = format(len(variations[synset_name]), '02x') + u" "
-            index += len(text)
+            index += utf8len(text)
             text_chunks.append(text)
             
             for variation in variations[synset_name]:
                 text = variation
-                index += len(text)
+                index += utf8len(text)
                 text_chunks.append(text)
                 
                 m = re.match(r'(.*?)(\(.*\))?$', text.lower())
@@ -137,7 +140,7 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
                 variation_map[lemma_name].append(synset)
                 
                 text = u" 0 "
-                index += len(text)
+                index += utf8len(text)
                 text_chunks.append(text)
         else:
             # use the english lemma
@@ -151,7 +154,7 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
             else:
                 lemma = u"<unknown>"
             text = u"01 " + lemma + u" 0 "
-            index += len(text)
+            index += utf8len(text)
             text_chunks.append(text)
 
         # relations
@@ -180,41 +183,41 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
                         valid_relations.append((type, rel_offset, rel_pos, 0, 0))
 
             text = str(len(valid_relations)).zfill(2) + u" "
-            index += len(text)
+            index += utf8len(text)
             text_chunks.append(text)
             
             for type, rel_offset, rel_pos, lemma_from, lemma_to in valid_relations:
                 text = type + u" "
-                index += len(text)
+                index += utf8len(text)
                 text_chunks.append(text)
                 
                 text = rel_offset
-                index += len(text)
+                index += utf8len(text)
                 text_chunks.append(u"@" + text + rel_pos)
 
                 text = u" " + rel_pos + u" " + format(lemma_from, '02x') + format(lemma_to, '02x') + u" "
-                index += len(text)
+                index += utf8len(text)
                 text_chunks.append(text)
         else:
             text = u"0 "
-            index += len(text)
+            index += utf8len(text)
             text_chunks.append(text)
 
         # gloss
         if (gloss == u"NULL" or gloss.strip() == "") and eng_offset in spa_glosses:
             try:
                 text = u"| " + spa_glosses[eng_offset] + u"  \n"
-                index += len(text)
+                index += utf8len(text)
                 text_chunks.append(text)
             except UnicodeEncodeError as e:
                 text = u"| " + gloss + u"  \n"
-                index += len(text)
+                index += utf8len(text)
                 text_chunks.append(text)
                 print eng_offset
                 print e
         else:
             text = u"| " + gloss + u"  \n"
-            index += len(text)
+            index += utf8len(text)
             text_chunks.append(text)
 
     return text_chunks, variation_map
