@@ -26,9 +26,11 @@ class TestTransform(unittest.TestCase):
 
     def test_invalid_literal_for_int_16(self):
         self.wncr = WordNetCorpusReader('wordnet_spa', None)
-        self.wncr._synset_from_pos_and_line('n',
-                                            u"04122387 00 n 0a agudeza 0 broma 0 chiste 0 chufleta 0 comentario_burlón 0 cuchufleta 0 idea 0 ocurrencia 0 pulla 0 salida 0 04 @ 04120601 n 0000 + 00620096 v 0000 + 00499330 v 0000 + 00558467 v 0000 | comentario ingenioso para hacer reír  \n")
-        # success if there is no error
+        for synset in self.wncr.synsets("agudeza"):
+            a = synset
+#        self.wncr._synset_from_pos_and_line('n',
+#                                            u"04122387 00 n 0a agudeza 0 broma 0 chiste 0 chufleta 0 comentario_burlón 0 cuchufleta 0 idea 0 ocurrencia 0 pulla 0 salida 0 04 @ 04120601 n 0000 + 00620096 v 0000 + 00499330 v 0000 + 00558467 v 0000 | comentario ingenioso para hacer reír  \n")
+#        # success if there is no error
 
     def test_key_error(self):
         self.wncr = WordNetCorpusReader('wordnet_spa', None)
@@ -37,7 +39,8 @@ class TestTransform(unittest.TestCase):
 
     def test_all_synsets(self):
         self.wncr = WordNetCorpusReader('wordnet_spa', None)
-        self.wncr.all_synsets()
+        for synset in self.wncr.all_synsets():
+            a = synset
         # success if there is no error
 
     @classmethod
