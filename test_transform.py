@@ -18,11 +18,11 @@ class TestTransform(unittest.TestCase):
                 with tarfile.open(fileobj=xz) as f:
                     f.extractall(wn_name)
 
-    def test_load_wordnet(self):
-        for lang in self.languages:
-            wn_name = 'wordnet_' + lang
-            self.wncr = WordNetCorpusReader(wn_name, None)
-            # success if there is no error
+    def test_all_synsets(self):
+        self.wncr = WordNetCorpusReader('wordnet_spa', None)
+        for synset in self.wncr.all_synsets():
+            a = synset
+        # success if there is no error
 
     def test_invalid_literal_for_int_16(self):
         self.wncr = WordNetCorpusReader('wordnet_spa', None)
@@ -37,11 +37,11 @@ class TestTransform(unittest.TestCase):
         self.wncr.lemma("menor.a.09.menor").antonyms()
         # success if there is no error
 
-    def test_all_synsets(self):
-        self.wncr = WordNetCorpusReader('wordnet_spa', None)
-        for synset in self.wncr.all_synsets():
-            a = synset
-        # success if there is no error
+    def test_load_wordnet(self):
+        for lang in self.languages:
+            wn_name = 'wordnet_' + lang
+            self.wncr = WordNetCorpusReader(wn_name, None)
+            # success if there is no error
 
     @classmethod
     def tearDownClass(cls):
