@@ -23,6 +23,7 @@ class TestTransform(unittest.TestCase):
         for synset in self.wncr.all_synsets():
             a = synset
         # success if there is no error
+        # This will also test that all synsets in data files are in index files.
 
     def test_invalid_literal_for_int_16(self):
         self.wncr = WordNetCorpusReader('wordnet_spa', None)

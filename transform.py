@@ -84,6 +84,8 @@ FILE_HEADER_INFO = \
 def get_file_header_info(lang, pos):
     return u"  1 MCR WordNet 3.0 (" + lang + u") " + POS_NAMES[pos] + u" data file\n" + FILE_HEADER_INFO
 
+unknown_count = 0
+
 def get_offset_pos(synset):
     split = synset.split("-")
     offset = split[2]
@@ -100,6 +102,8 @@ def utf8len(s):
     return len(s.encode('utf-8'))
 
 def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa_glosses, synset_map):
+    global unknown_count
+
     text_chunks = []
     variation_map = {}
 
@@ -152,7 +156,11 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
                     variation_map[lemma_name] = []
                 variation_map[lemma_name].append(synset)
             else:
-                lemma = u"<unknown>"
+                unknown_count += 1
+                lemma = u"<unknown" + str(unknown_count).zfill(4) + u">"
+                if not lemma in variation_map:
+                    variation_map[lemma] = []
+                variation_map[lemma].append(synset)
             text = u"01 " + lemma + u" 0 "
             index += utf8len(text)
             text_chunks.append(text)
