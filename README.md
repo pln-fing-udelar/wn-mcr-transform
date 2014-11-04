@@ -69,21 +69,19 @@ In particular, we must respect the constraint that the synset with numeric id XX
 
 The definition of relations in MCR and WordNet differ. In MCR there are more relations defined, and it is not always easy to know which corresponds to which. However, the most usual relations (such as hyponym/hypernym and meronym/holonym) have been correctly mapped. The mapping of MCR relations that are transformed to WordNet relations follows (note that some of the mappings could be wrong and change in the future):
 
-MCR                                 WordNet
-
-| Id | Name LR | Name RL | LR | Name LR | RL | Name RL |
+| MCR Id | MCR Name LR | MCR Name RL | WordNet LR | WordNet Name LR | WordNet RL | WordNet Name RL |
 | -- | ------- | ------- | -- | ------- | -- | ------- |
-| 1 | be_in_state | state_of | = | Attribute | = | Attribute |
-| 2 | causes | is_caused_by | > | cause | - | - |
-| 4 | has_derived | is_derived_from | \ | derived from adjective | - | - |
-| 6 | has_holo_madeof | has_mero_madeof | #s | substance holonym | %s | substance meronym |
-| 7 | has_holo_member | has_mero_member | #m | member holonym | %m | member meronym |
-| 8 | has_holo_part | has_mero_part | #p | part holonym | %p | part meronym |
-| 12 | has_hyponym | has_hyperonym | ~ | hyponym | @ | hypernym |
-| 19 | has_subevent | is_subevent_of | * | entailment | - | - |
-| 33 | near_antonym | - | ! | antonym | ! | antonym |
-| 34 | near_synonym | - | & | similar | & | similar |
-| 49 | see_also_wn15 | - | ^ | also see | - | - |
+| 1 | be\_in\_state | state_of | = | Attribute | = | Attribute |
+| 2 | causes | is\_caused\_by | > | cause | - | - |
+| 4 | has\_derived | is\_derived_from | \ | derived from adjective | - | - |
+| 6 | has\_holo\_madeof | has\_mero\_madeof | #s | substance holonym | %s | substance meronym |
+| 7 | has\_holo\_member | has\_mero\_member | #m | member holonym | %m | member meronym |
+| 8 | has\_holo\_part | has\_mero\_part | #p | part holonym | %p | part meronym |
+| 12 | has\_hyponym | has\_hyperonym | ~ | hyponym | @ | hypernym |
+| 19 | has\_subevent | is\_subevent\_of | * | entailment | - | - |
+| 33 | near\_antonym | - | ! | antonym | ! | antonym |
+| 34 | near\_synonym | - | & | similar | & | similar |
+| 49 | see\_also\_wn15 | - | ^ | also see | - | - |
 | 52 | verb_group | - | $ | verb group | $ | verb group |
 | 63 | category_term | category | -c | member - topic | ;c | domain - region |
 | 64 | related_to | - | + | deriv. related form | + | deriv. related form |
