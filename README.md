@@ -69,23 +69,23 @@ In particular, we must respect the constraint that the synset with numeric id XX
 
 The definition of relations in MCR and WordNet differ. In MCR there are more relations defined, and it is not always easy to know which corresponds to which. However, the most usual relations (such as hyponym/hypernym and meronym/holonym) have been correctly mapped. The mapping of MCR relations that are transformed to WordNet relations follows (note that some of the mappings could be wrong and change in the future):
 
-| MCR Id | MCR Name LR | MCR Name RL | WordNet LR | WordNet Name LR | WordNet RL | WordNet Name RL |
-| -- | ------- | ------- | -- | ------- | -- | ------- |
-| 1 | be\_in\_state | state_of | = | Attribute | = | Attribute |
-| 2 | causes | is\_caused\_by | > | cause | - | - |
-| 4 | has\_derived | is\_derived_from | \ | derived from adjective | - | - |
-| 6 | has\_holo\_madeof | has\_mero\_madeof | #s | substance holonym | %s | substance meronym |
-| 7 | has\_holo\_member | has\_mero\_member | #m | member holonym | %m | member meronym |
-| 8 | has\_holo\_part | has\_mero\_part | #p | part holonym | %p | part meronym |
-| 12 | has\_hyponym | has\_hyperonym | ~ | hyponym | @ | hypernym |
-| 19 | has\_subevent | is\_subevent\_of | * | entailment | - | - |
-| 33 | near\_antonym | - | ! | antonym | ! | antonym |
-| 34 | near\_synonym | - | & | similar | & | similar |
-| 49 | see\_also\_wn15 | - | ^ | also see | - | - |
-| 52 | verb_group | - | $ | verb group | $ | verb group |
-| 63 | category_term | category | -c | member - topic | ;c | domain - region |
-| 64 | related_to | - | + | deriv. related form | + | deriv. related form |
-| 66 | region_term | region | -r | member - region | ;r | domain - region |
-| 68 | usage_term | usage | -u | member - usage | ;u | domain - usage |
+MCR Id | MCR Name LR | MCR Name RL | WordNet LR | WordNet Name LR | WordNet RL | WordNet Name RL
+:-----:|:-----------:|:-----------:|:----------:|:---------------:|:----------:|:---------------:
+1 | be\_in\_state | state_of | = | Attribute | = | Attribute
+2 | causes | is\_caused\_by | > | cause |  | 
+4 | has\_derived | is\_derived_from | \ | derived from adjective |  | 
+6 | has\_holo\_madeof | has\_mero\_madeof | #s | substance holonym | %s | substance meronym
+7 | has\_holo\_member | has\_mero\_member | #m | member holonym | %m | member meronym
+8 | has\_holo\_part | has\_mero\_part | #p | part holonym | %p | part meronym
+12 | has\_hyponym | has\_hyperonym | ~ | hyponym | @ | hypernym
+19 | has\_subevent | is\_subevent\_of | * | entailment |  | 
+33 | near\_antonym |  | ! | antonym | ! | antonym
+34 | near\_synonym |  | & | similar | & | similar
+49 | see\_also\_wn15 |  | ^ | also see |  | 
+52 | verb_group |  | $ | verb group | $ | verb group
+63 | category_term | category | -c | member - topic | ;c | domain - region
+64 | related_to |  | + | deriv. related form | + | deriv. related form
+66 | region_term | region | -r | member - region | ;r | domain - region
+68 | usage_term | usage | -u | member - usage | ;u | domain - usage
 
 There is a difference between the way hypernyms are defined in MCR and WordNet. Also, in the original WordNet the antonym relation holds between two lemmas (the NLTK corpus reader browses the antonyms this way), while in MCR the relation is between synsets. Because of this, we consider that an antonym relation between synsets S1 and S2 in MCR will correspond, in the transformed version, to a set of antonym relations between lemmas L1 and L2, for all L1 in S1 and all L2 in S2.
