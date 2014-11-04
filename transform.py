@@ -214,17 +214,17 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
         # gloss
         if (gloss == "NULL" or gloss.strip() == "") and eng_offset in spa_glosses:
             try:
-                text = "| " + spa_glosses[eng_offset] + "  \n"
+                text = "| " + spa_glosses[eng_offset] + "\n"
                 index += utf8len(text)
                 text_chunks.append(text)
             except UnicodeEncodeError as e:
-                text = "| " + gloss + "  \n"
+                text = "| " + gloss + "\n"
                 index += utf8len(text)
                 text_chunks.append(text)
                 print(eng_offset)
                 print(e)
         else:
-            text = "| " + gloss + "  \n"
+            text = "| " + gloss + "\n"
             index += utf8len(text)
             text_chunks.append(text)
 
@@ -252,7 +252,7 @@ def write_index_file(root_result, pos, lang, variations_map, synset_map):
         file.write(lemma + " " + pos + " " + synset_count + " 0 " + synset_count + " 0")
         for offset in variations_map[lemma]:
             file.write(" {0:08d}".format(synset_map["@" + offset + pos]))
-        file.write("  \n")
+        file.write("\n")
     file.close()
 
 def load_synsets(root_eng, pos, eng_synsets, eng_glosses):
