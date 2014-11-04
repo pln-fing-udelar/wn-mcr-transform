@@ -69,8 +69,8 @@ In particular, we must respect the constraint that the synset with numeric id XX
 
 The definition of relations in MCR and WordNet differ. In MCR there are more relations defined, and it is not always easy to know which corresponds to which. However, the most usual relations (such as hyponym/hypernym and meronym/holonym) have been correctly mapped. The mapping of MCR relations that are transformed to WordNet relations follows (note that some of the mappings could be wrong and change in the future):
 
-MCR Id | MCR Name LR | MCR Name RL | WordNet LR | WordNet Name LR | WordNet RL | WordNet Name RL
-:-----:|:-----------:|:-----------:|:----------:|:---------------:|:----------:|:---------------:
+MCR Id | MCR Name LR | MCR Name RL | WN LR | WN Name LR | WN RL | WN Name RL
+:-----:|:-----------:|:-----------:|:-----:|:----------:|:-----:|:----------:
 1 | be\_in\_state | state_of | = | Attribute | = | Attribute
 2 | causes | is\_caused\_by | > | cause |  | 
 4 | has\_derived | is\_derived_from | \ | derived from adjective |  | 
