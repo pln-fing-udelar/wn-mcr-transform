@@ -3,10 +3,11 @@
 #
 # This module transforms MCR 3.0 database files into WordNet 3.0 database files.
 # The resulting files can be loaded with the nltk WordNet reader using:
-#     >>> nltk.corpus.reader.wordnet.WordNetCorpusReader(<FILES_ROOT>, None)
+# >>> nltk.corpus.reader.wordnet.WordNetCorpusReader(<FILES_ROOT>, None)
 # 
 # Author: Luis Chiruzzo <luischir@fing.edu.uy>
 
+from collections import defaultdict
 import io
 import re
 import sys
@@ -49,100 +50,103 @@ SYMMETRIC_RELATION_MAP = {
     68: ";u"
 }
 
-FILE_HEADER_INFO = \
-    "  2 This file was created from the Multilingual Central Repository 3.0.\n" + \
-    "  3 The latest MCR 3.0 files can be downloaded from\n" + \
-    "  4 http://adimen.si.ehu.es/web/MCR/\n" + \
-    "  5 The latest version of the transformation process can be found in\n" + \
-    "  6 https://github.com/pln-fing-udelar/wn-mcr-transform\n" + \
-    "  7 \n" + \
-    "  8 For more details on the MCR 3.0 contents, including references to the\n" + \
-    "  9 original resources, please consult the following paper:\n" + \
-    "  10   Gonzalez-Agirre A., Laparra E. and Rigau G. Multilingual Central\n" + \
-    "  11   Repository version 3.0: upgrading a very large lexical knowledge\n" + \
-    "  12   base. In Proceedings of the Sixth International Global WordNet\n" + \
-    "  13   Conference (GWC'12). Matsue, Japan. January, 2012.\n" + \
-    "  14 which can be downloaded at:\n" + \
-    "  15 http://adimen.si.ehu.es/~rigau/publications/gwc12-glr.pdf\n" + \
-    "  16 \n" + \
-    "  17 The contents of the MCR package are distributed under different open licenses.\n" + \
-    "  18 If you want to redistribute this software, part of it, or derived works based\n" + \
-    "  19 on it or on any of its parts, make sure you are doing so under the terms stated\n" + \
-    "  20 in the license applying to each of the involved modules.\n" + \
-    "  21 The licenses applying to the modules contained in MCR are the following:\n" + \
-    "  22  - English WordNet synset and relation data, contained in folder engWN/ are\n" + \
-    "  23      distributed under the original WordNet license. You can find it at\n" + \
-    "  24      http://wordnet.princeton.edu/wordnet/license\n" + \
-    "  25  - Basque WordNet synset and relation data, contained in folder eusWN/ are\n" + \
-    "  26      distributed under CreativeCommons Attribution-NonCommercial-ShareAlike 3.0\n" + \
-    "  27      Unported (CC BY-NC-SA 3.0) license. You can find it at\n" + \
-    "  28      http://creativecommons.org/licenses/by-nc-sa/3.0\n" + \
-    "  29  - All other data in MCR package are distributed under Attribution 3.0 Unported\n" + \
-    "  30      (CC BY 3.0) license. You can find it at\n" + \
-    "  31      http://creativecommons.org/licenses/by/3.0/\n"
 
 def get_file_header_info(lang, pos):
-    return "  1 MCR WordNet 3.0 (" + lang + ") " + POS_NAMES[pos] + " data file\n" + FILE_HEADER_INFO
+    return """\
+  1 MCR WordNet 3.0 ({lang}) {pos} data file
+  2 This file was created from the Multilingual Central Repository 3.0.
+  3 The latest MCR 3.0 files can be downloaded from
+  4 http://adimen.si.ehu.es/web/MCR/
+  5 The latest version of the transformation process can be found in
+  6 https://github.com/pln-fing-udelar/wn-mcr-transform
+  7 
+  8 For more details on the MCR 3.0 contents, including references to the
+  9 original resources, please consult the following paper:
+  10   Gonzalez-Agirre A., Laparra E. and Rigau G. Multilingual Central
+  11   Repository version 3.0: upgrading a very large lexical knowledge
+  12   base. In Proceedings of the Sixth International Global WordNet
+  13   Conference (GWC'12). Matsue, Japan. January, 2012.
+  14 which can be downloaded at:
+  15 http://adimen.si.ehu.es/~rigau/publications/gwc12-glr.pdf
+  16 
+  17 The contents of the MCR package are distributed under different open licenses.
+  18 If you want to redistribute this software, part of it, or derived works based
+  19 on it or on any of its parts, make sure you are doing so under the terms stated
+  20 in the license applying to each of the involved modules.
+  21 The licenses applying to the modules contained in MCR are the following:
+  22  - English WordNet synset and relation data, contained in folder engWN/ are
+  23      distributed under the original WordNet license. You can find it at
+  24      http://wordnet.princeton.edu/wordnet/license
+  25  - Basque WordNet synset and relation data, contained in folder eusWN/ are
+  26      distributed under CreativeCommons Attribution-NonCommercial-ShareAlike 3.0
+  27      Unported (CC BY-NC-SA 3.0) license. You can find it at
+  28      http://creativecommons.org/licenses/by-nc-sa/3.0
+  29  - All other data in MCR package are distributed under Attribution 3.0 Unported
+  30      (CC BY 3.0) license. You can find it at
+  31      http://creativecommons.org/licenses/by/3.0/
+""".format(lang=lang, pos=POS_NAMES[pos])
+
 
 def get_offset_pos(synset):
-    split = synset.split("-")
-    offset = split[2]
-    pos = split[3]
+    _, _, offset, pos = synset.split("-")
     return offset, pos
+
 
 def get_synset(lang, offset, pos):
     return lang + "-30-" + offset + "-" + pos
 
+
 def lexical_relations():
     return ["!"]
+
 
 def utf8len(s):
     return len(s.encode('utf-8'))
 
+
 unknown_count = 0
+
 
 def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa_glosses, synset_map):
     global unknown_count
 
     text_chunks = []
-    variation_map = {}
+    variation_map = defaultdict(list)
 
     text = get_file_header_info(lang, pos)
     index = utf8len(text)
     text_chunks.append(text)
 
-    synsets_set = dict([pos, set(synsets[pos][0])] for pos in synsets)
-    
+    synsets_set = {pos: set(synsets[pos][0]) for pos in synsets}
+
     for synset, gloss in synsets[pos]:
         synset_name = get_synset(lang, synset, pos)
         eng_offset = synset + pos
-        
+
         text = synset
         synset_map["@" + text + pos] = index
         index += utf8len(text)
         text_chunks.append("@" + text + pos)
-        
+
         text = " 00 " + pos + " "
         index += utf8len(text)
         text_chunks.append(text)
-        
+
         # variations
         if synset_name in variations:
             text = format(len(variations[synset_name]), '02x') + " "
             index += utf8len(text)
             text_chunks.append(text)
-            
+
             for variation in variations[synset_name]:
                 text = variation
                 index += utf8len(text)
                 text_chunks.append(text)
-                
+
                 m = re.match(r'(.*?)(\(.*\))?$', text.lower())
                 lemma_name, syn_mark = m.groups()
-                if not lemma_name in variation_map:
-                    variation_map[lemma_name] = []
                 variation_map[lemma_name].append(synset)
-                
+
                 text = " 0 "
                 index += utf8len(text)
                 text_chunks.append(text)
@@ -152,14 +156,10 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
                 lemma = "`" + eng_synsets[eng_offset]
                 m = re.match(r'(.*?)(\(.*\))?$', lemma.lower())
                 lemma_name, syn_mark = m.groups()
-                if not lemma_name in variation_map:
-                    variation_map[lemma_name] = []
                 variation_map[lemma_name].append(synset)
             else:
                 unknown_count += 1
                 lemma = "<unknown" + str(unknown_count).zfill(4) + ">"
-                if not lemma in variation_map:
-                    variation_map[lemma] = []
                 variation_map[lemma].append(synset)
             text = "01 " + lemma + " 0 "
             index += utf8len(text)
@@ -168,10 +168,10 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
         # relations
         if synset_name in relations:
             valid_relations = []
-            for type, rs in relations[synset_name]:
+            for _type, rs in relations[synset_name]:
                 rel_offset, rel_pos = get_offset_pos(rs)
                 if rel_offset in synsets_set[rel_pos] or rel_offset + rel_pos in eng_synsets:
-                    if type in lexical_relations():
+                    if _type in lexical_relations():
                         synset_to = get_synset(lang, rel_offset, rel_pos)
 
                         if synset_name in variations:
@@ -184,21 +184,21 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
                         else:
                             len_lemmas_to = 1
 
-                        for i_lemma_from in range(1, len_lemmas_from+1):
-                            for i_lemma_to in range(1, len_lemmas_to+1):
-                                valid_relations.append((type, rel_offset, rel_pos, i_lemma_from, i_lemma_to))
+                        for i_lemma_from in range(1, len_lemmas_from + 1):
+                            for i_lemma_to in range(1, len_lemmas_to + 1):
+                                valid_relations.append((_type, rel_offset, rel_pos, i_lemma_from, i_lemma_to))
                     else:
-                        valid_relations.append((type, rel_offset, rel_pos, 0, 0))
+                        valid_relations.append((_type, rel_offset, rel_pos, 0, 0))
 
             text = str(len(valid_relations)).zfill(2) + " "
             index += utf8len(text)
             text_chunks.append(text)
-            
-            for type, rel_offset, rel_pos, lemma_from, lemma_to in valid_relations:
-                text = type + " "
+
+            for _type, rel_offset, rel_pos, lemma_from, lemma_to in valid_relations:
+                text = _type + " "
                 index += utf8len(text)
                 text_chunks.append(text)
-                
+
                 text = rel_offset
                 index += utf8len(text)
                 text_chunks.append("@" + text + rel_pos)
@@ -230,112 +230,105 @@ def create_data_file(pos, lang, synsets, variations, relations, eng_synsets, spa
 
     return text_chunks, variation_map
 
+
 def write_data_file(root_result, pos, text_chunks, synset_map):
     filename = root_result + "/data." + POS_NAMES[pos]
     print(filename)
-    file = io.open(filename, mode="w", encoding="utf-8")
-    for text in text_chunks:
-        if text in synset_map:
-            file.write("{0:08d}".format(synset_map[text]))
-        else:
-            file.write(text)
-    file.close()
+    with io.open(filename, mode="w", encoding="utf-8") as _file:
+        for text in text_chunks:
+            if text in synset_map:
+                _file.write("{0:08d}".format(synset_map[text]))
+            else:
+                _file.write(text)
+
 
 def write_index_file(root_result, pos, lang, variations_map, synset_map):
     lemmas = sorted(variations_map.keys())
     filename = root_result + "/index." + POS_NAMES[pos]
     print(filename)
-    file = io.open(filename, mode="w", encoding="utf-8")
-    file.write(get_file_header_info(lang, pos))
-    for lemma in lemmas:
-        synset_count = str(len(variations_map[lemma]))
-        file.write(lemma + " " + pos + " " + synset_count + " 0 " + synset_count + " 0")
-        for offset in variations_map[lemma]:
-            file.write(" {0:08d}".format(synset_map["@" + offset + pos]))
-        file.write("\n")
-    file.close()
+    with io.open(filename, mode="w", encoding="utf-8") as _file:
+        _file.write(get_file_header_info(lang, pos))
+        for lemma in lemmas:
+            synset_count = str(len(variations_map[lemma]))
+            _file.write(lemma + " " + pos + " " + synset_count + " 0 " + synset_count + " 0")
+            for offset in variations_map[lemma]:
+                _file.write(" {0:08d}".format(synset_map["@" + offset + pos]))
+            _file.write("\n")
+
 
 def load_synsets(root_eng, pos, eng_synsets, eng_glosses):
-    file = io.open(root_eng + "/data." + POS_NAMES[pos], encoding="utf-8")
-    for line in file:
-        if not line.startswith("  "):
-            split = line.split(" ")
-            offset = split[0]
-            first_lemma = split[4]
-            eng_synsets[offset + pos] = first_lemma
-            gloss_split = line.split(" | ")
-            eng_glosses[offset + pos] = gloss_split[1].strip()
-    file.close()
-    
+    with io.open(root_eng + "/data." + POS_NAMES[pos], encoding="utf-8") as _file:
+        for line in _file:
+            if not line.startswith("  "):
+                split = line.split(" ")
+                offset = split[0]
+                first_lemma = split[4]
+                eng_synsets[offset + pos] = first_lemma
+                gloss_split = line.split(" | ")
+                eng_glosses[offset + pos] = gloss_split[1].strip()
+
+
 def write_english_glosses(eng_glosses, result_path):
     print("Writing english glosses...")
-    file = io.open(result_path, mode="w", encoding="utf-8")
-    for offset in sorted(eng_glosses):
-        file.write(offset + " | " + eng_glosses[offset] + "\n")
-    file.close()
-    
+    with io.open(result_path, mode="w", encoding="utf-8") as _file:
+        for offset in sorted(eng_glosses):
+            _file.write(offset + " | " + eng_glosses[offset] + "\n")
+
+
 def load_foreign_glosses(foreign_glosses_path):
     print("Loading foreign glosses...")
-    file = io.open(foreign_glosses_path, encoding="utf-8")
-    glosses = {}
-    for line in file:
-        split = line.split(" | ")
-        offset = split[0].strip()
-        gloss = split[1].strip()
-        glosses[offset] = gloss
-    file.close()
-    return glosses
+    with io.open(foreign_glosses_path, encoding="utf-8") as _file:
+        glosses = {}
+        for line in _file:
+            offset, gloss = line.split(" | ")
+            offset = offset.strip()
+            gloss = gloss.strip()
+            glosses[offset] = gloss
+        return glosses
+
 
 def load_valid_synsets(root_mcr, lang):
     print("Loading valid synsets...")
-    file = io.open(root_mcr + "/" + lang + "WN/wei_" + lang + "-30_synset.tsv", encoding="utf-8")
-    synsets = {}
-    for pos in POS_NAMES:
-        synsets[pos] = []
-    for line in file:
-        split = line.split("\t")
-        if split[0].strip() != "":
-            synset_number, synset_pos = get_offset_pos(split[0])
-            synset_gloss = split[6]
-            synsets[synset_pos].append((synset_number, synset_gloss))
-    file.close()
-    return synsets
+    with io.open(root_mcr + "/" + lang + "WN/wei_" + lang + "-30_synset.tsv", encoding="utf-8") as _file:
+        synsets = defaultdict(list)
+        for line in _file:
+            split = line.split("\t")
+            if split[0].strip() != "":
+                synset_number, synset_pos = get_offset_pos(split[0])
+                synset_gloss = split[6]
+                synsets[synset_pos].append((synset_number, synset_gloss))
+        return synsets
+
 
 def load_synset_variants(root_mcr, lang):
     print("Loading synset variants...")
-    vars_file = io.open(root_mcr + "/" + lang + "WN/wei_" + lang + "-30_variant.tsv", encoding="utf-8")
-    variants = {}
-    for line in vars_file.readlines():
-        split = line.split("\t")
-        variant = split[0]
-        synset = split[2]
-        if synset not in variants:
-            variants[synset] = []
-        variants[synset].append(variant)
-    vars_file.close()
-    return variants
+    with io.open(root_mcr + "/" + lang + "WN/wei_" + lang + "-30_variant.tsv", encoding="utf-8") as vars_file:
+        variants = defaultdict(list)
+        for line in vars_file.readlines():
+            split = line.split("\t")
+            variant = split[0]
+            synset = split[2]
+            variants[synset].append(variant)
+        return variants
+
 
 def load_synset_relations(root_mcr, lang):
     print("Loading synset relations...")
-    rels_file = io.open(root_mcr + "/" + lang + "WN/wei_" + lang + "-30_relation.tsv", encoding="utf-8")
-    relations = {}
-    for line in rels_file:
-        split = line.split("\t")
-        type = int(split[0])
-        from_synset = split[1]
-        to_synset = split[3]
-        if type in RELATION_MAP:
-            if from_synset not in relations:
-                relations[from_synset] = set()
-            relations[from_synset].add((RELATION_MAP[type], to_synset))
-            if type in SYMMETRIC_RELATION_MAP:
-                if to_synset not in relations:
-                    relations[to_synset] = set()
-                relations[to_synset].add((SYMMETRIC_RELATION_MAP[type], from_synset))
-    rels_file.close()
-    return relations
+    with io.open(root_mcr + "/" + lang + "WN/wei_" + lang + "-30_relation.tsv", encoding="utf-8") as rels_file:
+        relations = defaultdict(set)
+        for line in rels_file:
+            split = line.split("\t")
+            _type = int(split[0])
+            from_synset = split[1]
+            to_synset = split[3]
+            if _type in RELATION_MAP:
+                relations[from_synset].add((RELATION_MAP[_type], to_synset))
+                if _type in SYMMETRIC_RELATION_MAP:
+                    relations[to_synset].add((SYMMETRIC_RELATION_MAP[_type], from_synset))
+        return relations
 
-def transform(root_mcr, root_eng, lang, root_result, foreign_glosses_path = None):
+
+def transform(root_mcr, root_eng, lang, root_result, foreign_glosses_path=None):
     """
     Transforms the set of MCR 3.0 files into a text database compatible with the nltk WordNet corpus reader.
 
@@ -360,11 +353,11 @@ def transform(root_mcr, root_eng, lang, root_result, foreign_glosses_path = None
     for pos in POS_NAMES:
         load_synsets(root_eng, pos, eng_synsets, eng_glosses)
 
-    if foreign_glosses_path != None:
-        foreign_glosses = load_foreign_glosses(foreign_glosses_path)
-    else:
+    if foreign_glosses_path is None:
         foreign_glosses = {}
-    
+    else:
+        foreign_glosses = load_foreign_glosses(foreign_glosses_path)
+
     print("Creating data files...")
     synset_map = {}
 
@@ -372,11 +365,13 @@ def transform(root_mcr, root_eng, lang, root_result, foreign_glosses_path = None
     variations = {}
 
     for pos in POS_NAMES:
-        data[pos], variations[pos] = create_data_file(pos, lang, synsets, variants, relations, eng_synsets, foreign_glosses, synset_map)
+        data[pos], variations[pos] = create_data_file(pos, lang, synsets, variants, relations, eng_synsets,
+                                                      foreign_glosses, synset_map)
 
     for pos in POS_NAMES:
         write_data_file(root_result, pos, data[pos], synset_map)
         write_index_file(root_result, pos, lang, variations[pos], synset_map)
+
 
 def export_glosses(root_eng, result_path):
     """
@@ -390,16 +385,17 @@ def export_glosses(root_eng, result_path):
     eng_glosses = {}
     for pos in POS_NAMES:
         load_synsets(root_eng, pos, eng_synsets, eng_glosses)
-    
+
     write_english_glosses(eng_glosses, result_path)
+
 
 if __name__ == "__main__":
     if 5 <= len(sys.argv) <= 6:
         if len(sys.argv) == 5 or sys.argv[5] == "":
-            foreign_glosses_path = None
+            _foreign_glosses_path = None
         else:
-            foreign_glosses_path = sys.argv[5]
-        transform(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], foreign_glosses_path)
+            _foreign_glosses_path = sys.argv[5]
+        transform(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], _foreign_glosses_path)
     else:
         print("Invalid number of arguments. Syntax should be:")
-        print("    $ python transform.py root_mcr root_eng lang root_result [foreign_glosses_path]")
+        print("    $ python3 transform.py root_mcr root_eng lang root_result [foreign_glosses_path]")
