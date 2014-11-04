@@ -8,7 +8,7 @@ if [ "$#" -lt 2 -o "$#" -gt 3 ]; then
 else
 	ROOT_MCR=${1%%/}
 	ROOT_ENG=${2%%/}
-	ROOT_RESULT=aux
+	ROOT_RESULT=.aux
 	FOREIGN_GLOSSES_PATH=${3%%/}
 	mkdir $ROOT_RESULT
 	if [ ! -d $ROOT_RESULT -o "$(ls -A $ROOT_RESULT)" ]; then

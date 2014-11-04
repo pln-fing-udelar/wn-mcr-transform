@@ -10,20 +10,21 @@ class TestTransform(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.languages = ["cat", "eng", "eus", "glg", "spa"]
+        cls.wn_names = {}
         for lang in cls.languages:
-            wn_name = 'wordnet_' + lang
-            with tarfile.open(wn_name + '.tar.lzma') as f:
-                    f.extractall(wn_name)
+            cls.wn_names[lang] = '.wordnet_' + lang
+            with tarfile.open('wordnet_' + lang + '.tar.lzma') as f:
+                    f.extractall(cls.wn_names[lang])
 
     def test_all_synsets(self):
-        self.wncr = WordNetCorpusReader('wordnet_spa', None)
+        self.wncr = WordNetCorpusReader(self.wn_names['spa'], None)
         for synset in self.wncr.all_synsets():
             a = synset
         # success if there is no error
         # This will also test that all synsets in data files are in index files.
 
     def test_invalid_literal_for_int_16(self):
-        self.wncr = WordNetCorpusReader('wordnet_spa', None)
+        self.wncr = WordNetCorpusReader(self.wn_names['spa'], None)
         for synset in self.wncr.synsets("agudeza"):
             a = synset
 #        self.wncr._synset_from_pos_and_line('n',
@@ -31,21 +32,19 @@ class TestTransform(unittest.TestCase):
 #        # success if there is no error
 
     def test_key_error(self):
-        self.wncr = WordNetCorpusReader('wordnet_spa', None)
+        self.wncr = WordNetCorpusReader(self.wn_names['spa'], None)
         self.wncr.lemma("menor.a.09.menor").antonyms()
         # success if there is no error
 
     def test_load_wordnet(self):
         for lang in self.languages:
-            wn_name = 'wordnet_' + lang
-            self.wncr = WordNetCorpusReader(wn_name, None)
+            self.wncr = WordNetCorpusReader(self.wn_names[lang], None)
             # success if there is no error
 
     @classmethod
     def tearDownClass(cls):
         for lang in cls.languages:
-            wn_name = 'wordnet_' + lang
-            shutil.rmtree(wn_name)
+            shutil.rmtree(cls.wn_names[lang])
 
 
 if __name__ == '__main__':
