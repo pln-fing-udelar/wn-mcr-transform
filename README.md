@@ -47,10 +47,10 @@ However, if you have another source where you can get the glosses in your langua
 
 1. In a Python shell, import the transform module
 2. Execute the following command:
-```python
->>> transform.export_glosses(<path to WORDNET_EN_ROOT>, <path to EN_GLOSSES_FILE>)
-```
-This creates the file EN_GLOSSES_FILE, which will contain the English glosses for all synsets. The file format is straightforward. Each line contains the gloss for one synset in this format: <id> | <gloss>, where <id> is a concatenation of the offset in the WordNet 3.0 database file and the part of speech of the synset. For example, the synset corresponding to "entity" in English has this line: 00001740n | that which is perceived...
+
+        >>> transform.export_glosses(<path to WORDNET_EN_ROOT>, <path to EN_GLOSSES_FILE>)
+    
+    This creates the file EN_GLOSSES_FILE, which will contain the English glosses for all synsets. The file format is straightforward. Each line contains the gloss for one synset in this format: <id> | <gloss>, where <id> is a concatenation of the offset in the WordNet 3.0 database file and the part of speech of the synset. For example, the synset corresponding to "entity" in English has this line: 00001740n | that which is perceived...
 
 3. Translate the glosses using any means you can. As long as the format is honored and the identifiers are kept, the process will be able to get the translated glosses and merge them with the rest of the data. We will assume that you have created a new file TRANSLATED_GLOSSES_FILE containing the translated glosses.
 
