@@ -1,18 +1,14 @@
 # WN-MCR-Transform
 
-Transform the MCR 3.0 database so that it can be loaded using the NLTK WordNet reader.
+This script transforms the [Multilingual Central Repository](http://adimen.si.ehu.es/web/MCR/) (MCR) 3.0 database so that it can be loaded using the [NLTK](http://www.nltk.org/) WordNet reader.
 
-This file has a quick user guide to transform and use the MCR 3.0 files, as well as a description of the overall transformation process and its limitations.
+## Transforming the MCR 3.0 corpus
 
-This software was created by Grupo de Procesamiento de Lenguaje Natural from Instituto de Computación, Facultad de Ingeniería, Universidad de la República, Uruguay. Any questions or comments can be addressed at Luis Chiruzzo (luischir@fing.edu.uy).
-
-## Transforming the MCR 3.0 corpus:
-
-The compressed files can be downloaded directly from here, but if you prefer to generate them, do the following.
+The result of the transformation is in each of the compressed files here, correspoding to the available languages in MCR, so you can directly download and use them. If you want to generate them yourself, do the following.
 
 Download the needed files:
 
-* [The Multilingual Central Repository 3.0 corpus](http://adimen.si.ehu.es/web/MCR/)
+* [The MCR 3.0 corpus](http://adimen.si.ehu.es/web/MCR/)
 * [The NLTK toolkit](http://www.nltk.org/)
 * The WordNet corpus for NLTK, which can be downloaded using `nltk.download()` after NLTK is installed.
 
@@ -26,9 +22,7 @@ Then:
 $ ./generate_all.sh <path to MCR_ROOT> <path to WORDNET_EN_ROOT>
 ```
 
-After step 3, the data.* and index.* files contained in RESULT_ROOT will be replaced with new versions containing the MCR 3.0 information for the desired language.
-
-The available languages so far and their codes are:
+After step 3, the data.* and index.* files contained in RESULT_ROOT will be replaced with new versions containing the MCR 3.0 information for the desired language. The available languages so far in MCR and their codes are:
 
 * Catalan - cat
 * English - eng
@@ -36,7 +30,7 @@ The available languages so far and their codes are:
 * Galician - glg
 * Spanish - spa
 
-## Using the transformed MCR 3.0 corpus:
+## Using the transformed MCR 3.0 corpus
 
 ```python
 >>> import nltk
@@ -44,7 +38,7 @@ The available languages so far and their codes are:
 >>> print(wncr.synset("entidad.n.01").definition)
 ```
 
-## Exporting and importing the glosses:
+## Exporting and importing the glosses
 
 MCR is a work in progress and not all the contents have been fully translated. This is specially true about glosses, for example only around 15% of the glosses in the Spanish version have been translated. For some applications this might be an issue.
 However, if you have another source where you can get the glosses in your language (for example using a machine translation process) you can import that data so it can be merged with the MCR 3.0 during the transformation.
@@ -61,7 +55,7 @@ This creates the file EN_GLOSSES_FILE, which will contain the English glosses fo
 $ python3 transform.py <path to MCR_ROOT> <path to WORDNET_EN_ROOT> <LANGUAGE> <path to RESULT_ROOT> <path to TRANSLATED_GLOSSES_FILE>
 ```
 
-## Description of the process and limitations:
+## Description of the process and limitations
 
 The transformation process is straightforward. The synsets are loaded, variants and relations files from MCR. Then that information is used to create data and index files respecting the constraints of the WordNet database files.
 
