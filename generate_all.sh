@@ -19,14 +19,14 @@ else
 			echo "Processing $LANG..."
 			echo "-------------------"
 			TAR_FILE=wordnet_$LANG.tar
-			LZMA_FILE=$TAR_FILE.lzma
-			tar -xf $LZMA_FILE -C $ROOT_RESULT
-			rm $LZMA_FILE
+			GZ_FILE=$TAR_FILE.gz
+			tar -xf $GZ_FILE -C $ROOT_RESULT
+			rm $GZ_FILE
 			./transform.py "$ROOT_MCR" "$ROOT_ENG" "$LANG" "$ROOT_RESULT" "$FOREIGN_GLOSSES_PATH"
 			tar -cf $TAR_FILE -C $ROOT_RESULT .
 			rm $ROOT_RESULT/*
 			echo "Compressing..."
-			lzma -9 $TAR_FILE
+			gzip -9 $TAR_FILE
 		done
 		echo "Done"
 	fi

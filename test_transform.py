@@ -13,7 +13,7 @@ class TestTransform(unittest.TestCase):
         cls.wn_names = {}
         for lang in cls.languages:
             cls.wn_names[lang] = '.wordnet_' + lang
-            with tarfile.open('wordnet_' + lang + '.tar.lzma') as f:
+            with tarfile.open('wordnet_' + lang + '.tar.gz') as f:
                     f.extractall(cls.wn_names[lang])
 
     def test_all_synsets(self):
