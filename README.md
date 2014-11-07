@@ -54,7 +54,7 @@ This creates the file EN_GLOSSES_FILE, which will contain the English glosses fo
 3. Translate the glosses using any means you can. As long as the format is honored and the identifiers are kept, the process will be able to get the translated glosses and merge them with the rest of the data. We will assume that you have created a new file TRANSLATED_GLOSSES_FILE containing the translated glosses.
 4. Execute the following command:
 ```shell
-$ python3 transform.py <path to MCR_ROOT> <path to WORDNET_EN_ROOT> <LANGUAGE> <path to RESULT_ROOT> <path to TRANSLATED_GLOSSES_FILE>
+$ ./transform.py <path to MCR_ROOT> <path to WORDNET_EN_ROOT> <LANGUAGE> <path to RESULT_ROOT> <path to TRANSLATED_GLOSSES_FILE>
 ```
 
 ## Description of the process and limitations
