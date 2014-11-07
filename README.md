@@ -22,6 +22,8 @@ Then:
 $ ./generate_all.sh <path to MCR_ROOT> <path to WORDNET_EN_ROOT>
 ```
 
+Note: this script will call transform.py python script, in which python 2.7.x and python 3.x versions are supported.
+
 After step 3, the data.* and index.* files contained in RESULT_ROOT will be replaced with new versions containing the MCR 3.0 information for the desired language. The available languages so far in MCR and their codes are:
 
 * Catalan - cat
