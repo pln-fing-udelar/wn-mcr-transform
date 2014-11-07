@@ -1,5 +1,7 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # coding=utf-8
+from __future__ import unicode_literals
+
 from nltk.corpus import WordNetCorpusReader
 import shutil
 import tarfile

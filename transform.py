@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # coding=utf-8
 #
 # This module transforms MCR 3.0 database files into WordNet 3.0 database files.
@@ -6,6 +6,8 @@
 # >>> nltk.corpus.reader.wordnet.WordNetCorpusReader(<FILES_ROOT>, None)
 # 
 # Author: Luis Chiruzzo <luischir@fing.edu.uy>
+
+from __future__ import unicode_literals
 
 from collections import defaultdict
 import io
