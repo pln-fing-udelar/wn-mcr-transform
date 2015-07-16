@@ -38,7 +38,7 @@ With Python:
 
 ```python
 import nltk
-wncr = nltk.corpus.reader.wordnet.WordNetCorpusReader(<path to RESULT_ROOT>)
+wncr = nltk.corpus.reader.wordnet.WordNetCorpusReader(<path to RESULT_ROOT>, None)
 print(wncr.synset("entidad.n.01").definition)
 ```
 
