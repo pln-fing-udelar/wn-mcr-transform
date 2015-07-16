@@ -14,8 +14,8 @@ Download the needed files:
 
 Then:
 
-1. Find your WordNet 3.0 database files. They can be typically found in ~/nltk_data/corpora/wordnet, but the location of these files might vary in your installation. We will refer to the WordNet 3.0 database folder as WORDNET_EN_ROOT. We will refer to folder you just created, where the transformed files will be, as RESULT_ROOT.
-2. Extract the MCR 3.0 files to a folder. This will create a series of folders containing WordNet versions for different languages. We will refer to this folder as MCR_ROOT.
+1. Find your WordNet 3.0 database files. They can be typically found in ~/nltk\_data/corpora/wordnet, but the location of these files might vary in your installation. We will refer to the WordNet 3.0 database folder as WORDNET\_EN\_ROOT. We will refer to folder you just created, where the transformed files will be, as RESULT\_ROOT.
+2. Extract the MCR 3.0 files to a folder. This will create a series of folders containing WordNet versions for different languages. We will refer to this folder as MCR\_ROOT.
 3. Run the command:
 
 ```shell
@@ -24,7 +24,7 @@ $ ./generate_all.sh <path to MCR_ROOT> <path to WORDNET_EN_ROOT>
 
 Note: this script will call transform.py python script, in which python 2.7.x and python 3.x versions are supported.
 
-After step 3, the data.* and index.* files contained in RESULT_ROOT will be replaced with new versions containing the MCR 3.0 information for the desired language. The available languages so far in MCR and their codes are:
+After step 3, the data.* and index.* files contained in RESULT\_ROOT will be replaced with new versions containing the MCR 3.0 information for the desired language. The available languages so far in MCR and their codes are:
 
 * Catalan - cat
 * English - eng
@@ -54,9 +54,9 @@ However, if you have another source where you can get the glosses in your langua
 transform.export_glosses(<path to WORDNET_EN_ROOT>, <path to EN_GLOSSES_FILE>)
 ```
     
-This creates the file EN_GLOSSES_FILE, which will contain the English glosses for all synsets. The file format is straightforward. Each line contains the gloss for one synset in this format: <id> | <gloss>, where <id> is a concatenation of the offset in the WordNet 3.0 database file and the part of speech of the synset. For example, the synset corresponding to "entity" in English has this line: 00001740n | that which is perceived...
+This creates the file EN\_GLOSSES\_FILE, which will contain the English glosses for all synsets. The file format is straightforward. Each line contains the gloss for one synset in this format: <id> | <gloss>, where <id> is a concatenation of the offset in the WordNet 3.0 database file and the part of speech of the synset. For example, the synset corresponding to "entity" in English has this line: 00001740n | that which is perceived...
 
-3. Translate the glosses using any means you can. As long as the format is honored and the identifiers are kept, the process will be able to get the translated glosses and merge them with the rest of the data. We will assume that you have created a new file TRANSLATED_GLOSSES_FILE containing the translated glosses.
+3. Translate the glosses using any means you can. As long as the format is honored and the identifiers are kept, the process will be able to get the translated glosses and merge them with the rest of the data. We will assume that you have created a new file TRANSLATED\_GLOSSES\_FILE containing the translated glosses.
 
 4. Execute the following shell command:
 
@@ -74,9 +74,9 @@ The definition of relations in MCR and WordNet differ. In MCR there are more rel
 
 MCR Id | MCR Name LR | MCR Name RL | WN LR | WN Name LR | WN RL | WN Name RL
 :-----:|:-----------:|:-----------:|:-----:|:----------:|:-----:|:----------:
-1 | be\_in\_state | state_of | = | Attribute | = | Attribute
+1 | be\_in\_state | state\_of | = | Attribute | = | Attribute
 2 | causes | is\_caused\_by | > | cause |  | 
-4 | has\_derived | is\_derived_from | \ | derived from adjective |  | 
+4 | has\_derived | is\_derived\_from | \ | derived from adjective |  | 
 6 | has\_holo\_madeof | has\_mero\_madeof | #s | substance holonym | %s | substance meronym
 7 | has\_holo\_member | has\_mero\_member | #m | member holonym | %m | member meronym
 8 | has\_holo\_part | has\_mero\_part | #p | part holonym | %p | part meronym
@@ -85,10 +85,10 @@ MCR Id | MCR Name LR | MCR Name RL | WN LR | WN Name LR | WN RL | WN Name RL
 33 | near\_antonym |  | ! | antonym | ! | antonym
 34 | near\_synonym |  | & | similar | & | similar
 49 | see\_also\_wn15 |  | ^ | also see |  | 
-52 | verb_group |  | $ | verb group | $ | verb group
-63 | category_term | category | -c | member - topic | ;c | domain - region
-64 | related_to |  | + | deriv. related form | + | deriv. related form
-66 | region_term | region | -r | member - region | ;r | domain - region
+52 | verb\_group |  | $ | verb group | $ | verb group
+63 | category\_term | category | -c | member - topic | ;c | domain - region
+64 | related\_to |  | + | deriv. related form | + | deriv. related form
+66 | region\_term | region | -r | member - region | ;r | domain - region
 68 | usage_term | usage | -u | member - usage | ;u | domain - usage
 
 There is a difference between the way hypernyms are defined in MCR and WordNet. Also, in the original WordNet the antonym relation holds between two lemmas (the NLTK corpus reader browses the antonyms this way), while in MCR the relation is between synsets. Because of this, we consider that an antonym relation between synsets S1 and S2 in MCR will correspond, in the transformed version, to a set of antonym relations between lemmas L1 and L2, for all L1 in S1 and all L2 in S2.
