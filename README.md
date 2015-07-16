@@ -34,10 +34,12 @@ After step 3, the data.* and index.* files contained in RESULT_ROOT will be repl
 
 ## Using the transformed MCR 3.0 corpus
 
+With Python:
+
 ```python
->>> import nltk
->>> wncr = nltk.corpus.reader.wordnet.WordNetCorpusReader(<path to RESULT_ROOT>)
->>> print(wncr.synset("entidad.n.01").definition)
+import nltk
+wncr = nltk.corpus.reader.wordnet.WordNetCorpusReader(<path to RESULT_ROOT>)
+print(wncr.synset("entidad.n.01").definition)
 ```
 
 ## Exporting and importing the glosses
@@ -46,17 +48,20 @@ MCR is a work in progress and not all the contents have been fully translated. T
 However, if you have another source where you can get the glosses in your language (for example using a machine translation process) you can import that data so it can be merged with the MCR 3.0 during the transformation.
 
 1. In a Python shell, import the transform module
-2. Execute the following command:
+2. Execute the following Python command:
 
-        >>> transform.export_glosses(<path to WORDNET_EN_ROOT>, <path to EN_GLOSSES_FILE>)
+```python
+transform.export_glosses(<path to WORDNET_EN_ROOT>, <path to EN_GLOSSES_FILE>)
+```
     
     This creates the file EN_GLOSSES_FILE, which will contain the English glosses for all synsets. The file format is straightforward. Each line contains the gloss for one synset in this format: <id> | <gloss>, where <id> is a concatenation of the offset in the WordNet 3.0 database file and the part of speech of the synset. For example, the synset corresponding to "entity" in English has this line: 00001740n | that which is perceived...
 
 3. Translate the glosses using any means you can. As long as the format is honored and the identifiers are kept, the process will be able to get the translated glosses and merge them with the rest of the data. We will assume that you have created a new file TRANSLATED_GLOSSES_FILE containing the translated glosses.
 
-4. Execute the following command:
+4. Execute the following shell command:
+
 ```shell
-$ ./transform.py <path to MCR_ROOT> <path to WORDNET_EN_ROOT> <LANGUAGE> <path to RESULT_ROOT> <path to TRANSLATED_GLOSSES_FILE>
+./transform.py <path to MCR_ROOT> <path to WORDNET_EN_ROOT> <LANGUAGE> <path to RESULT_ROOT> <path to TRANSLATED_GLOSSES_FILE>
 ```
 
 ## Description of the process and limitations
@@ -87,3 +92,4 @@ MCR Id | MCR Name LR | MCR Name RL | WN LR | WN Name LR | WN RL | WN Name RL
 68 | usage_term | usage | -u | member - usage | ;u | domain - usage
 
 There is a difference between the way hypernyms are defined in MCR and WordNet. Also, in the original WordNet the antonym relation holds between two lemmas (the NLTK corpus reader browses the antonyms this way), while in MCR the relation is between synsets. Because of this, we consider that an antonym relation between synsets S1 and S2 in MCR will correspond, in the transformed version, to a set of antonym relations between lemmas L1 and L2, for all L1 in S1 and all L2 in S2.
+
